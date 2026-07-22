@@ -389,7 +389,7 @@ const STREETS = {
   '_L':21.0,'_R':80.0
 };
 const VX = Object.values(STREETS).sort((a,b)=>a-b);
-const HY = [19,26,31,36,41,46,52,56.56,59.5,63.5,67.5,72.5,78,84];
+const HY = [19,26,31,35.4,37.0,40.2,43.1,44.9,48.2,58.7,61.3,64.4,66.0,69.2,72.4,74.0,80.3];
 
 const waypoints = [];
 const wpIdx=(vi,hi)=>{
@@ -449,17 +449,20 @@ function calcRoute(idA,idB){
   if(!sA||!sB) return null;
   const wpA=standToWP({x:sA.x,y:sA.y});
   const wpB=standToWP({x:sB.x,y:sB.y});
-  if(wpA===wpB) return [{x:sA.x,y:sA.y},{x:sB.x,y:sB.y}];
+  if(wpA===wpB){
+    const wp=waypoints[wpA];
+    return [{x:sA.x,y:sA.y},{x:sA.x,y:wp.y},{x:sB.x,y:wp.y},{x:sB.x,y:sB.y}];
+  }
   const path=aStar(wpA,wpB);
   if(!path.length) return null;
   const pts=[{x:sA.x,y:sA.y}];
   const wpApos=waypoints[path[0]];
-  pts.push({x:wpApos.x,y:sA.y});
+  pts.push({x:sA.x,y:wpApos.y});
   pts.push({x:wpApos.x,y:wpApos.y});
   for(let i=1;i<path.length-1;i++) pts.push({...waypoints[path[i]]});
   const wpBpos=waypoints[path[path.length-1]];
   pts.push({x:wpBpos.x,y:wpBpos.y});
-  pts.push({x:wpBpos.x,y:sB.y});
+  pts.push({x:sB.x,y:wpBpos.y});
   pts.push({x:sB.x,y:sB.y});
   // Dedupe
   const out=[pts[0]];
