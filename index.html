@@ -32,16 +32,15 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#eee;heigh
 #map-viewport:active{cursor:grabbing}
 #map-inner{position:relative;display:inline-block;transform-origin:0 0}
 #map-inner img{display:block;max-width:none}
-
 #svg-overlay{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
 
 .stand-marker{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
-.stand-dot{width:8px;height:8px;border-radius:50%;background:rgba(100,180,255,.55);border:1.5px solid rgba(100,180,255,.85);transition:.15s}
-.stand-marker:hover .stand-dot{width:14px;height:14px;background:#e94560;border-color:#fff;box-shadow:0 0 0 3px rgba(233,69,96,.4)}
-.stand-marker.origin .stand-dot{width:14px;height:14px;background:#48bb78;border-color:#68d391;box-shadow:0 0 0 3px rgba(72,187,120,.4)}
-.stand-marker.destination .stand-dot{width:14px;height:14px;background:#ed8936;border-color:#fbd38d;box-shadow:0 0 0 3px rgba(237,137,54,.4)}
+.stand-dot{width:7px;height:7px;border-radius:50%;background:rgba(100,180,255,.55);border:1.5px solid rgba(100,180,255,.9);transition:.15s}
+.stand-marker:hover .stand-dot{width:13px;height:13px;background:#e94560;border-color:#fff;box-shadow:0 0 0 3px rgba(233,69,96,.4)}
+.stand-marker.origin .stand-dot{width:13px;height:13px;background:#48bb78;border-color:#68d391;box-shadow:0 0 0 3px rgba(72,187,120,.4)}
+.stand-marker.destination .stand-dot{width:13px;height:13px;background:#ed8936;border-color:#fbd38d;box-shadow:0 0 0 3px rgba(237,137,54,.4)}
 
-#tooltip{position:fixed;background:#1a202c;border:1px solid #2d3a5a;border-radius:8px;padding:8px 12px;font-size:12px;pointer-events:none;z-index:999;display:none;max-width:210px;box-shadow:0 4px 15px rgba(0,0,0,.5)}
+#tooltip{position:fixed;background:#1a202c;border:1px solid #2d3a5a;border-radius:8px;padding:8px 12px;font-size:12px;pointer-events:none;z-index:999;display:none;max-width:220px;box-shadow:0 4px 15px rgba(0,0,0,.5)}
 #tooltip .tip-id{font-weight:800;color:#e94560;font-size:14px}
 #tooltip .tip-company{color:#a0aec0;margin-top:2px;font-size:12px}
 #tooltip .tip-actions{margin-top:6px;display:flex;gap:6px}
@@ -64,13 +63,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#eee;heigh
 .dot-g{width:10px;height:10px;border-radius:50%;background:#48bb78;flex-shrink:0}
 .dot-r{width:10px;height:10px;border-radius:50%;background:#ed8936;flex-shrink:0}
 .dot-b{width:10px;height:10px;border-radius:50%;background:rgba(100,180,255,.7);flex-shrink:0}
-.dot-e{width:10px;height:10px;border-radius:50%;background:#e94560;flex-shrink:0}
 
-.route-path{stroke:#e94560;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:14 7;animation:dash 1s linear infinite}
-@keyframes dash{to{stroke-dashoffset:-21}}
-.route-bg{stroke:rgba(255,255,255,.25);stroke-width:9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.route-path{stroke:#e94560;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:12 6;animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-18}}
+.route-bg{stroke:rgba(255,255,255,.2);stroke-width:8;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .pin-anim{animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{r:12}50%{r:16}}
+@keyframes pulse{0%,100%{r:11}50%{r:15}}
 </style>
 </head>
 <body>
@@ -83,12 +81,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#eee;heigh
 <div id="panel">
   <div class="field ac-wrap">
     <label>📍 Estou no stand</label>
-    <input id="inp-from" type="text" placeholder="Ex: J90, H40, SAP..." autocomplete="off">
+    <input id="inp-from" type="text" placeholder="Ex: J90, H40, SAP, SHOPEE..." autocomplete="off">
     <div class="ac-list" id="ac-from" style="display:none"></div>
   </div>
   <div class="field ac-wrap">
     <label>🎯 Quero ir para</label>
-    <input id="inp-to" type="text" placeholder="Ex: K30, MAGALU, SHOPEE..." autocomplete="off">
+    <input id="inp-to" type="text" placeholder="Ex: K30, MAGALU, AMAZON..." autocomplete="off">
     <div class="ac-list" id="ac-to" style="display:none"></div>
   </div>
   <button id="btn-route" onclick="doRoute()">➤ Traçar Rota</button>
@@ -116,7 +114,6 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#eee;heigh
   <div id="legend">
     <div><span class="dot-g"></span> Origem</div>
     <div><span class="dot-r"></span> Destino</div>
-    <div><span class="dot-e"></span> Rota</div>
     <div><span class="dot-b"></span> Stand</div>
   </div>
 </div>
@@ -131,60 +128,73 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#eee;heigh
 </div>
 
 <script>
-// ── DADOS ─────────────────────────────────────────────────
-const STANDS = {"J21": {"x": 46.369, "y": 71.719, "company": "ECBR SESSIONS"}, "A70": {"x": 77.844, "y": 46.647, "company": ""}, "E80": {"x": 66.476, "y": 41.287, "company": "E80"}, "P11": {"x": 24.995, "y": 77.947, "company": "ONFLY"}, "P21": {"x": 24.992, "y": 63.131, "company": "SERPRO"}, "P31": {"x": 24.879, "y": 57.01, "company": "P31"}, "P41": {"x": 26.345, "y": 38.476, "company": ""}, "P40": {"x": 29.947, "y": 68.483, "company": ""}, "P51": {"x": 24.92, "y": 35.54, "company": ""}, "A10": {"x": 72.752, "y": 82.483, "company": "PALCO SOLUÇÕES"}, "A12": {"x": 77.703, "y": 46.317, "company": "CONCIERGE"}, "C10": {"x": 63.699, "y": 75.137, "company": "ECBR IMPRENSA"}, "H10": {"x": 63.699, "y": 75.137, "company": "SEBRAE"}, "J10": {"x": 48.272, "y": 75.079, "company": "OCTADESK"}, "H20": {"x": 56.08, "y": 72.726, "company": "MERCADO LIVRE"}, "G21": {"x": 56.08, "y": 72.726, "company": "SEBRAE"}, "J20": {"x": 48.272, "y": 69.854, "company": "OMNICHAT"}, "H30": {"x": 51.864, "y": 65.134, "company": "BLING"}, "I30": {"x": 51.864, "y": 65.134, "company": "TRAY"}, "J30": {"x": 51.864, "y": 65.134, "company": "NUVEMSHOP"}, "H40": {"x": 51.864, "y": 60.421, "company": "SAP"}, "I40": {"x": 51.864, "y": 60.421, "company": "TIKTOK"}, "J40": {"x": 51.864, "y": 60.421, "company": "GRUPO INTELIPOST"}, "F50": {"x": 57.069, "y": 54.018, "company": "ALLOMNI"}, "G50": {"x": 57.069, "y": 54.018, "company": "HUBIFY"}, "H50": {"x": 57.069, "y": 54.018, "company": "STONE"}, "I50": {"x": 57.069, "y": 54.018, "company": "ANYTOOLS"}, "F60": {"x": 55.085, "y": 49.015, "company": "TOTAL EXPRESS"}, "G60": {"x": 55.085, "y": 49.015, "company": "HUB40"}, "H60": {"x": 55.085, "y": 49.015, "company": "MAMBA"}, "I60": {"x": 55.085, "y": 49.015, "company": "CB FULL"}, "J60": {"x": 55.085, "y": 49.015, "company": "MERCADO PAGO"}, "F70": {"x": 55.08, "y": 43.839, "company": "CHINA LINK"}, "G70": {"x": 55.08, "y": 43.839, "company": "JADLOG"}, "H70": {"x": 55.08, "y": 43.839, "company": "J&T EXPRESS"}, "I70": {"x": 55.08, "y": 43.839, "company": "TOPSORT"}, "J70": {"x": 55.08, "y": 43.839, "company": "SERASA EXPERIAN"}, "G80": {"x": 53.493, "y": 38.666, "company": "UAPPI"}, "H80": {"x": 53.493, "y": 38.666, "company": "ASAAS"}, "I80": {"x": 53.493, "y": 38.666, "company": "SHOPEE"}, "J80": {"x": 53.493, "y": 38.666, "company": "INSIDER ONE"}, "J90": {"x": 48.708, "y": 32.966, "company": "SEALED AIR"}, "K30": {"x": 43.506, "y": 65.134, "company": "PAGBRASIL"}, "K40": {"x": 43.506, "y": 60.421, "company": "AMAZON"}, "L30": {"x": 38.032, "y": 65.134, "company": "APEXBRASIL"}, "L40": {"x": 38.032, "y": 60.421, "company": "WAKE"}, "M10": {"x": 34.465, "y": 75.079, "company": "BBM LOGÍSTICA"}, "M20": {"x": 34.465, "y": 69.854, "company": "BW COMMERCE"}, "M30": {"x": 34.465, "y": 65.134, "company": "SMART ONLINE"}, "M40": {"x": 34.465, "y": 60.421, "company": "BANCO PACTUAL"}, "K50": {"x": 40.776, "y": 54.014, "company": "TOTVS"}, "L50": {"x": 40.776, "y": 54.014, "company": "EFÍ BANK"}, "K60": {"x": 38.975, "y": 48.963, "company": "IMILE DELIVERY"}, "L60": {"x": 38.975, "y": 48.963, "company": "AFTER CLICK"}, "M60": {"x": 38.975, "y": 48.963, "company": "HI PLATFORM"}, "K70": {"x": 38.999, "y": 43.899, "company": "WPP COMMERCE"}, "L70": {"x": 38.999, "y": 43.899, "company": "MAGAZORD"}, "M70": {"x": 38.999, "y": 43.899, "company": "IRROBA"}, "K80": {"x": 38.999, "y": 38.745, "company": "SELIA"}, "L80": {"x": 38.999, "y": 38.745, "company": "GS1 BRASIL"}, "M80": {"x": 38.999, "y": 38.745, "company": "MADEIRA MADEIRA"}, "K90": {"x": 43.494, "y": 34.039, "company": "ANJUN EXPRESS"}, "L90": {"x": 38.0, "y": 32.929, "company": "WEB ESTRATÉGICA"}, "N11": {"x": 32.321, "y": 78.098, "company": "VITRIO"}, "O10": {"x": 32.321, "y": 78.098, "company": ""}, "N13": {"x": 32.308, "y": 76.368, "company": "MELHOR ENVIO"}, "O12": {"x": 32.308, "y": 76.368, "company": ""}, "N21": {"x": 32.32, "y": 74.905, "company": "WEBCONTINENTAL"}, "O20": {"x": 32.32, "y": 74.905, "company": ""}, "N23": {"x": 32.308, "y": 73.165, "company": "MARKETPLACE SCORE"}, "O22": {"x": 32.308, "y": 73.165, "company": ""}, "O11": {"x": 30.474, "y": 78.097, "company": "O11"}, "P12": {"x": 29.938, "y": 76.373, "company": ""}, "O13": {"x": 29.938, "y": 76.373, "company": "O13"}, "O21": {"x": 30.444, "y": 74.872, "company": "O21"}, "N31": {"x": 32.32, "y": 71.699, "company": "LEROY MERLIN"}, "O30": {"x": 32.32, "y": 71.699, "company": ""}, "N33": {"x": 32.308, "y": 69.956, "company": "LOJA INTEGRADA"}, "O32": {"x": 32.308, "y": 69.956, "company": ""}, "N41": {"x": 32.308, "y": 68.487, "company": "RECLAME AQUI"}, "O40": {"x": 32.308, "y": 68.487, "company": ""}, "N43": {"x": 32.308, "y": 66.76, "company": "FRETE RÁPIDO"}, "O42": {"x": 32.308, "y": 66.76, "company": ""}, "O31": {"x": 29.947, "y": 71.699, "company": "O31"}, "P30": {"x": 29.947, "y": 71.699, "company": ""}, "O33": {"x": 29.941, "y": 69.962, "company": ""}, "P32": {"x": 29.941, "y": 69.962, "company": ""}, "O41": {"x": 29.947, "y": 68.483, "company": ""}, "O43": {"x": 29.944, "y": 66.768, "company": ""}, "P42": {"x": 29.944, "y": 66.768, "company": ""}, "N51": {"x": 32.31, "y": 65.255, "company": "8D"}, "O50": {"x": 32.31, "y": 65.255, "company": ""}, "N53": {"x": 32.295, "y": 63.572, "company": "HUBIFY"}, "O52": {"x": 32.295, "y": 63.572, "company": ""}, "O51": {"x": 29.95, "y": 65.255, "company": ""}, "P50": {"x": 29.95, "y": 65.255, "company": ""}, "O53": {"x": 29.922, "y": 63.567, "company": ""}, "P52": {"x": 29.922, "y": 63.567, "company": ""}, "N61": {"x": 32.31, "y": 62.099, "company": "ALLOMNI"}, "O60": {"x": 32.31, "y": 62.099, "company": ""}, "N63": {"x": 32.298, "y": 60.369, "company": "E-COMMERCE PARTNER"}, "O62": {"x": 32.298, "y": 60.369, "company": ""}, "O61": {"x": 29.927, "y": 62.099, "company": ""}, "P60": {"x": 29.927, "y": 62.099, "company": ""}, "O63": {"x": 29.941, "y": 60.371, "company": ""}, "P62": {"x": 29.941, "y": 60.371, "company": ""}, "N71": {"x": 32.314, "y": 56.995, "company": "WAVE COMERCIAL"}, "O70": {"x": 32.314, "y": 56.995, "company": ""}, "N73": {"x": 32.306, "y": 55.316, "company": "BUDA DIGITAL"}, "O72": {"x": 32.306, "y": 55.316, "company": ""}, "N81": {"x": 32.311, "y": 53.809, "company": "AGÊNCIA FG"}, "O80": {"x": 32.311, "y": 53.809, "company": ""}, "N83": {"x": 32.322, "y": 52.109, "company": "GOLOG"}, "O82": {"x": 32.322, "y": 52.109, "company": ""}, "O71": {"x": 29.94, "y": 56.995, "company": ""}, "P70": {"x": 29.94, "y": 56.995, "company": ""}, "O73": {"x": 29.934, "y": 55.315, "company": ""}, "P72": {"x": 29.934, "y": 55.315, "company": ""}, "O81": {"x": 29.945, "y": 53.808, "company": ""}, "P80": {"x": 29.945, "y": 53.808, "company": ""}, "O83": {"x": 29.934, "y": 52.088, "company": ""}, "P82": {"x": 29.934, "y": 52.088, "company": ""}, "N91": {"x": 32.315, "y": 50.623, "company": "STAR LIVE"}, "O90": {"x": 32.315, "y": 50.623, "company": ""}, "N93": {"x": 32.309, "y": 48.911, "company": "CONECTA CARGO"}, "O92": {"x": 32.309, "y": 48.911, "company": ""}, "N101": {"x": 32.32, "y": 47.4, "company": "LATAM CARGO"}, "O100": {"x": 32.32, "y": 47.4, "company": ""}, "N103": {"x": 32.309, "y": 45.704, "company": "LOPE DIGITAL"}, "O102": {"x": 32.309, "y": 45.704, "company": ""}, "O91": {"x": 29.94, "y": 50.614, "company": ""}, "P90": {"x": 29.94, "y": 50.614, "company": ""}, "O93": {"x": 29.928, "y": 48.889, "company": ""}, "P92": {"x": 29.928, "y": 48.889, "company": ""}, "O101": {"x": 29.94, "y": 47.4, "company": ""}, "P100": {"x": 29.94, "y": 47.4, "company": ""}, "O103": {"x": 29.934, "y": 45.713, "company": ""}, "P102": {"x": 29.934, "y": 45.713, "company": ""}, "N111": {"x": 32.321, "y": 44.222, "company": "ONLINE IPS"}, "O110": {"x": 32.321, "y": 44.222, "company": ""}, "N113": {"x": 32.309, "y": 42.508, "company": "SURI SHOP"}, "O112": {"x": 32.309, "y": 42.508, "company": ""}, "O111": {"x": 29.944, "y": 44.219, "company": ""}, "P110": {"x": 29.944, "y": 44.219, "company": ""}, "O113": {"x": 29.926, "y": 42.51, "company": ""}, "P112": {"x": 29.926, "y": 42.51, "company": ""}, "N121": {"x": 32.321, "y": 41.027, "company": "AZUL EXPRESS"}, "O120": {"x": 32.321, "y": 41.027, "company": ""}, "N123": {"x": 32.309, "y": 39.308, "company": "N123"}, "O122": {"x": 32.309, "y": 39.308, "company": ""}, "O121": {"x": 29.932, "y": 41.026, "company": ""}, "P120": {"x": 29.932, "y": 41.026, "company": ""}, "O123": {"x": 29.936, "y": 39.302, "company": ""}, "P122": {"x": 29.936, "y": 39.302, "company": ""}, "N131": {"x": 32.311, "y": 37.827, "company": "N131"}, "O130": {"x": 32.311, "y": 37.827, "company": ""}, "N133": {"x": 32.303, "y": 36.102, "company": "N133"}, "O132": {"x": 32.303, "y": 36.102, "company": ""}, "O131": {"x": 29.94, "y": 37.826, "company": ""}, "P130": {"x": 29.94, "y": 37.826, "company": ""}, "O133": {"x": 29.929, "y": 36.1, "company": ""}, "P132": {"x": 29.929, "y": 36.1, "company": ""}, "N141": {"x": 32.302, "y": 34.619, "company": "N141"}, "O140": {"x": 32.302, "y": 34.619, "company": ""}, "N143": {"x": 32.31, "y": 32.9, "company": "N143"}, "O142": {"x": 32.31, "y": 32.9, "company": ""}, "O141": {"x": 29.945, "y": 34.641, "company": ""}, "P140": {"x": 29.945, "y": 34.641, "company": ""}, "O143": {"x": 29.935, "y": 32.903, "company": ""}, "P142": {"x": 29.935, "y": 32.903, "company": ""}, "B60": {"x": 75.176, "y": 50.649, "company": "BLACKWALL"}, "A61": {"x": 75.176, "y": 50.649, "company": ""}, "B70": {"x": 74.827, "y": 43.828, "company": "MARTZ"}, "B50": {"x": 75.176, "y": 55.701, "company": "JEDICRM"}, "A51": {"x": 75.176, "y": 55.701, "company": ""}, "B40": {"x": 75.176, "y": 62.1, "company": "SECONDS"}, "A41": {"x": 75.176, "y": 62.1, "company": ""}, "B30": {"x": 75.176, "y": 66.82, "company": "KONFIDENCY"}, "A31": {"x": 75.176, "y": 66.82, "company": ""}, "B20": {"x": 74.692, "y": 71.54, "company": "REVI"}, "A21": {"x": 76.133, "y": 72.805, "company": ""}, "C60": {"x": 71.66, "y": 48.963, "company": ""}, "B61": {"x": 72.599, "y": 50.649, "company": "GEARSEO"}, "C50": {"x": 72.126, "y": 55.701, "company": ""}, "B51": {"x": 72.126, "y": 55.701, "company": "BRANDDI"}, "C40": {"x": 71.66, "y": 60.421, "company": ""}, "B41": {"x": 72.599, "y": 62.1, "company": "BONIFIQ"}, "C30": {"x": 72.126, "y": 66.82, "company": ""}, "B31": {"x": 72.126, "y": 66.82, "company": "ADOPT"}, "C20": {"x": 72.126, "y": 71.54, "company": ""}, "B21": {"x": 72.126, "y": 71.54, "company": "BOXLINK"}, "C70": {"x": 71.784, "y": 43.836, "company": ""}, "B71": {"x": 72.672, "y": 45.575, "company": ""}, "D60": {"x": 68.604, "y": 48.963, "company": ""}, "C61": {"x": 69.561, "y": 50.649, "company": ""}, "D50": {"x": 69.083, "y": 54.018, "company": ""}, "C51": {"x": 69.083, "y": 54.018, "company": ""}, "D40": {"x": 68.604, "y": 60.421, "company": ""}, "C41": {"x": 69.561, "y": 62.108, "company": ""}, "D30": {"x": 69.083, "y": 66.82, "company": ""}, "C31": {"x": 69.083, "y": 66.82, "company": ""}, "D20": {"x": 69.083, "y": 71.54, "company": ""}, "C21": {"x": 69.083, "y": 71.54, "company": ""}, "D70": {"x": 69.207, "y": 43.832, "company": ""}, "C71": {"x": 69.207, "y": 43.832, "company": ""}, "E60": {"x": 66.035, "y": 48.963, "company": ""}, "D61": {"x": 66.035, "y": 48.963, "company": ""}, "E40": {"x": 66.035, "y": 60.421, "company": ""}, "D41": {"x": 66.035, "y": 60.421, "company": ""}, "E30": {"x": 66.28, "y": 68.08, "company": ""}, "D31": {"x": 66.28, "y": 68.08, "company": ""}, "E20": {"x": 66.035, "y": 71.54, "company": ""}, "D21": {"x": 66.035, "y": 71.54, "company": ""}, "E70": {"x": 66.159, "y": 43.828, "company": ""}, "D71": {"x": 66.159, "y": 43.828, "company": ""}, "D12": {"x": 69.083, "y": 75.079, "company": ""}, "C13": {"x": 69.083, "y": 75.079, "company": ""}, "E10": {"x": 66.026, "y": 76.757, "company": "MULTIAGENTS"}, "D11": {"x": 66.026, "y": 76.757, "company": "IKESAKI"}, "F80": {"x": 62.346, "y": 38.7, "company": "LIVE COMMERCE STAR"}, "E81": {"x": 62.346, "y": 38.7, "company": ""}, "F90": {"x": 48.802, "y": 32.956, "company": "FULL COMMERCE BRASIL"}, "E91": {"x": 48.802, "y": 32.956, "company": ""}, "G90": {"x": 48.802, "y": 32.956, "company": "INCOMM BRASIL"}, "F91": {"x": 48.802, "y": 32.956, "company": ""}, "H90": {"x": 48.802, "y": 32.956, "company": "WORKSHOP ECBR"}, "G91": {"x": 48.802, "y": 32.956, "company": ""}, "I90": {"x": 48.802, "y": 32.956, "company": "ÁGUIA SISTEMAS"}, "I91": {"x": 48.802, "y": 32.956, "company": "I91"}, "H91": {"x": 48.802, "y": 32.956, "company": ""}, "M90": {"x": 48.802, "y": 32.956, "company": "ACTIVE CAMPAIGN"}, "I20": {"x": 52.931, "y": 69.935, "company": "ADYEN"}, "H21": {"x": 52.931, "y": 69.935, "company": "BLIP"}, "I10": {"x": 57.448, "y": 76.761, "company": "GLOBO"}, "H11": {"x": 57.448, "y": 76.761, "company": "STONE"}, "F10": {"x": 57.448, "y": 76.761, "company": "ECBR SESSIONS"}, "E11": {"x": 57.448, "y": 76.761, "company": "IKESAKI"}, "G10": {"x": 57.448, "y": 76.761, "company": "MASTERCARD"}, "F11": {"x": 57.448, "y": 76.761, "company": "PALCO SOLUÇÕES"}, "F20": {"x": 61.83, "y": 72.85, "company": "F20"}, "E21": {"x": 62.833, "y": 71.581, "company": ""}, "G20": {"x": 58.674, "y": 69.93, "company": "GLOBO"}, "F21": {"x": 59.611, "y": 71.643, "company": "F21"}, "F30": {"x": 62.266, "y": 66.82, "company": "MAGALU"}, "E31": {"x": 62.266, "y": 66.82, "company": ""}, "G30": {"x": 58.598, "y": 65.141, "company": "APPMAX"}, "F31": {"x": 59.523, "y": 66.82, "company": ""}, "F40": {"x": 60.918, "y": 60.508, "company": "OLIST"}, "E41": {"x": 60.918, "y": 60.508, "company": ""}, "G40": {"x": 60.918, "y": 60.508, "company": "CUBBO"}, "F41": {"x": 60.918, "y": 60.508, "company": ""}, "M50": {"x": 65.618, "y": 56.379, "company": ""}, "J50": {"x": 48.272, "y": 56.379, "company": "BALCÃO MERCADO PAGO"}, "D10": {"x": 69.073, "y": 76.761, "company": "ECBR COMERCIAL"}, "C11": {"x": 69.073, "y": 76.761, "company": "ECBR COMERCIAL"}, "E12": {"x": 59.385, "y": 75.121, "company": ""}, "D13": {"x": 59.385, "y": 75.121, "company": ""}, "F12": {"x": 59.385, "y": 75.121, "company": ""}, "E13": {"x": 59.385, "y": 75.121, "company": ""}, "G12": {"x": 59.385, "y": 75.121, "company": ""}, "F13": {"x": 59.385, "y": 75.121, "company": ""}, "I12": {"x": 59.385, "y": 75.121, "company": ""}, "H13": {"x": 59.385, "y": 75.121, "company": ""}, "B22": {"x": 67.141, "y": 69.885, "company": ""}, "C22": {"x": 67.141, "y": 69.885, "company": ""}, "B23": {"x": 67.141, "y": 69.885, "company": ""}, "D22": {"x": 67.141, "y": 69.885, "company": ""}, "C23": {"x": 67.141, "y": 69.885, "company": ""}, "E22": {"x": 67.141, "y": 69.885, "company": ""}, "D23": {"x": 67.141, "y": 69.885, "company": ""}, "E23": {"x": 67.141, "y": 69.885, "company": ""}, "F23": {"x": 67.141, "y": 69.885, "company": ""}, "B32": {"x": 67.595, "y": 65.138, "company": ""}, "A33": {"x": 67.595, "y": 65.138, "company": ""}, "C32": {"x": 67.595, "y": 65.138, "company": ""}, "B33": {"x": 67.595, "y": 65.138, "company": ""}, "D32": {"x": 67.595, "y": 65.138, "company": ""}, "C33": {"x": 67.595, "y": 65.138, "company": ""}, "F32": {"x": 67.595, "y": 65.138, "company": ""}, "E33": {"x": 67.595, "y": 65.138, "company": ""}, "F33": {"x": 67.595, "y": 65.138, "company": ""}, "B42": {"x": 72.607, "y": 60.421, "company": ""}, "A43": {"x": 72.607, "y": 60.421, "company": ""}, "B43": {"x": 72.607, "y": 60.421, "company": ""}, "C43": {"x": 72.607, "y": 60.421, "company": ""}, "B52": {"x": 73.656, "y": 54.018, "company": ""}, "A53": {"x": 73.656, "y": 54.018, "company": ""}, "C52": {"x": 73.656, "y": 54.018, "company": ""}, "B53": {"x": 73.656, "y": 54.018, "company": ""}, "B62": {"x": 72.607, "y": 48.963, "company": ""}, "A63": {"x": 72.607, "y": 48.963, "company": ""}, "B63": {"x": 72.607, "y": 48.963, "company": ""}, "C63": {"x": 72.607, "y": 48.963, "company": ""}, "B73": {"x": 72.675, "y": 43.866, "company": ""}, "P3101": {"x": 24.24, "y": 56.441, "company": "REVI"}, "P3103": {"x": 24.24, "y": 56.441, "company": "BOXLINK"}, "P3113": {"x": 24.235, "y": 52.398, "company": "KONFIDENCY"}, "P3121": {"x": 24.474, "y": 50.366, "company": "ADOPT"}, "P3131": {"x": 24.008, "y": 46.327, "company": "SECONDS"}, "P3133": {"x": 24.474, "y": 46.327, "company": "BONIFIQ"}};
+const STANDS = {"J21": {"x": 46.369, "y": 71.719, "company": ""}, "A70": {"x": 77.844, "y": 46.647, "company": ""}, "E80": {"x": 66.476, "y": 41.287, "company": "passa"}, "P11": {"x": 24.995, "y": 77.947, "company": ""}, "P21": {"x": 24.992, "y": 63.131, "company": "SOMENTE"}, "P31": {"x": 24.879, "y": 57.01, "company": ""}, "P41": {"x": 24.92, "y": 38.402, "company": "NORDWARE"}, "P40": {"x": 29.401, "y": 68.486, "company": "NAIRUZ"}, "P51": {"x": 24.92, "y": 35.54, "company": "(LEMUND)"}, "A10": {"x": 72.752, "y": 82.483, "company": "VIP/PALESTRANTES"}, "A12": {"x": 77.703, "y": 46.317, "company": ""}, "C10": {"x": 71.899, "y": 75.079, "company": ""}, "H10": {"x": 55.498, "y": 75.195, "company": "WORKSHOP"}, "J10": {"x": 48.272, "y": 75.079, "company": ""}, "H20": {"x": 55.429, "y": 72.716, "company": "KWAI"}, "G21": {"x": 56.723, "y": 72.736, "company": "DIEX"}, "J20": {"x": 48.272, "y": 69.854, "company": "TIKTOK"}, "H30": {"x": 55.429, "y": 65.134, "company": "CUBBO"}, "I30": {"x": 52.24, "y": 65.134, "company": "MAGAZORD"}, "J30": {"x": 48.272, "y": 65.134, "company": "GRUPO"}, "H40": {"x": 55.429, "y": 60.421, "company": "HUB40"}, "I40": {"x": 52.24, "y": 60.421, "company": "OLIST"}, "J40": {"x": 48.272, "y": 60.421, "company": "BLIP"}, "F50": {"x": 61.855, "y": 54.014, "company": "DAFITI"}, "G50": {"x": 58.642, "y": 54.022, "company": "ZOOP"}, "H50": {"x": 55.429, "y": 54.014, "company": "SELIA"}, "I50": {"x": 52.24, "y": 54.014, "company": "JADLOG"}, "F60": {"x": 61.884, "y": 49.06, "company": "CIELO"}, "G60": {"x": 58.689, "y": 49.048, "company": "WPP"}, "H60": {"x": 55.466, "y": 49.046, "company": "IMILE"}, "I60": {"x": 52.21, "y": 49.066, "company": "UAPPI"}, "J60": {"x": 48.272, "y": 48.963, "company": "MERCADO"}, "F70": {"x": 61.874, "y": 43.88, "company": "INSIDER"}, "G70": {"x": 58.679, "y": 43.882, "company": "BASE"}, "H70": {"x": 55.446, "y": 43.88, "company": "SERASA"}, "I70": {"x": 52.235, "y": 43.909, "company": "MERCADO"}, "J70": {"x": 48.272, "y": 43.77, "company": "ADYEN"}, "G80": {"x": 58.679, "y": 38.716, "company": "ATIVAÇÃO"}, "H80": {"x": 55.456, "y": 38.7, "company": "J&T"}, "I80": {"x": 52.225, "y": 38.7, "company": "MAMBA"}, "J80": {"x": 48.272, "y": 38.616, "company": "SHOPEE"}, "J90": {"x": 48.708, "y": 32.966, "company": ""}, "K30": {"x": 43.506, "y": 65.134, "company": "WAKE"}, "K40": {"x": 43.506, "y": 60.421, "company": "MAGALU"}, "L30": {"x": 38.032, "y": 65.134, "company": "AMAZON"}, "L40": {"x": 38.032, "y": 60.421, "company": "APEXBRASIL"}, "M10": {"x": 34.465, "y": 75.079, "company": "GOOGLE"}, "M20": {"x": 34.465, "y": 69.854, "company": "EFÍ"}, "M30": {"x": 34.465, "y": 65.134, "company": "MASTERCARD"}, "M40": {"x": 34.465, "y": 60.421, "company": "TOTVS"}, "K50": {"x": 43.506, "y": 54.014, "company": "APPMAX"}, "L50": {"x": 38.032, "y": 54.014, "company": "PAGBRASIL"}, "K60": {"x": 43.506, "y": 48.963, "company": "TRAY"}, "L60": {"x": 38.032, "y": 48.963, "company": "NUVEMSHOP"}, "M60": {"x": 34.465, "y": 48.963, "company": "OCTADESK"}, "K70": {"x": 43.506, "y": 43.899, "company": "BLING"}, "L70": {"x": 38.032, "y": 43.899, "company": "OMNICHAT"}, "M70": {"x": 34.514, "y": 43.899, "company": "CHINA"}, "K80": {"x": 43.506, "y": 38.745, "company": "TOTAL"}, "L80": {"x": 38.032, "y": 38.745, "company": "STONE"}, "M80": {"x": 34.514, "y": 38.745, "company": "ANYTOOLS"}, "K90": {"x": 43.494, "y": 34.039, "company": "BORA"}, "L90": {"x": 38.0, "y": 32.929, "company": "SEBRAE"}, "N11": {"x": 32.847, "y": 78.1, "company": "CLOUD"}, "O10": {"x": 31.807, "y": 78.097, "company": "TECH"}, "N13": {"x": 32.835, "y": 76.367, "company": "MIX"}, "O12": {"x": 31.786, "y": 76.369, "company": "ABIACOM"}, "N21": {"x": 32.859, "y": 74.904, "company": "AFILIADOS"}, "O20": {"x": 31.785, "y": 74.906, "company": "CRUVA"}, "N23": {"x": 32.835, "y": 73.165, "company": "SHIPSMART"}, "O22": {"x": 31.786, "y": 73.165, "company": "TIVIT"}, "O11": {"x": 30.474, "y": 78.097, "company": ""}, "P12": {"x": 29.422, "y": 76.372, "company": "LIGA"}, "O13": {"x": 30.444, "y": 76.374, "company": "GREEN"}, "O21": {"x": 30.444, "y": 74.872, "company": "E-COMMERCE"}, "N31": {"x": 32.859, "y": 71.693, "company": "SISTEMAS"}, "O30": {"x": 31.785, "y": 71.706, "company": "NEXAAS"}, "N33": {"x": 32.836, "y": 69.962, "company": "ETRACTION"}, "O32": {"x": 31.785, "y": 69.95, "company": "SHANGHAI"}, "N41": {"x": 32.836, "y": 68.489, "company": "ADVERTISING"}, "O40": {"x": 31.784, "y": 68.486, "company": "BRASIL"}, "N43": {"x": 32.836, "y": 66.769, "company": "VETRUS"}, "O42": {"x": 31.785, "y": 66.752, "company": "AUREN"}, "O31": {"x": 30.483, "y": 71.706, "company": "ILUMINATAL"}, "P30": {"x": 29.401, "y": 71.693, "company": "JANIS"}, "O33": {"x": 30.471, "y": 69.961, "company": "DGMAX"}, "P32": {"x": 29.401, "y": 69.962, "company": "ZENVIA"}, "O41": {"x": 30.483, "y": 68.481, "company": "LABS"}, "O43": {"x": 30.462, "y": 66.769, "company": "ADSTART"}, "P42": {"x": 29.416, "y": 66.766, "company": "VIZZELA"}, "N51": {"x": 32.849, "y": 65.254, "company": "TENERITY"}, "O50": {"x": 31.777, "y": 65.256, "company": "AIM"}, "N53": {"x": 32.819, "y": 63.579, "company": "TROQUECOMMERCE"}, "O52": {"x": 31.777, "y": 63.566, "company": "VTRINA"}, "O51": {"x": 30.474, "y": 65.256, "company": "ALMAH"}, "P50": {"x": 29.416, "y": 65.254, "company": "GETNET"}, "O53": {"x": 30.45, "y": 63.568, "company": "OCTAPRICE"}, "P52": {"x": 29.383, "y": 63.566, "company": "EMBLUE"}, "N61": {"x": 32.849, "y": 62.099, "company": "MINDLOG"}, "O60": {"x": 31.776, "y": 62.099, "company": "BUZZMONITOR"}, "N63": {"x": 32.825, "y": 60.368, "company": "CUBO"}, "O62": {"x": 31.776, "y": 60.37, "company": "GHFLY"}, "O61": {"x": 30.462, "y": 62.102, "company": "SELMATTE"}, "P60": {"x": 29.383, "y": 62.097, "company": "VALIDITY"}, "O63": {"x": 30.49, "y": 60.372, "company": "ERP"}, "P62": {"x": 29.383, "y": 60.37, "company": "AGÊNCIA"}, "N71": {"x": 32.843, "y": 56.994, "company": "PAGHIPER"}, "O70": {"x": 31.789, "y": 56.996, "company": "POSTA"}, "N73": {"x": 32.832, "y": 55.316, "company": "SHOPPUB"}, "O72": {"x": 31.784, "y": 55.316, "company": "VELPACK"}, "N81": {"x": 32.843, "y": 53.809, "company": "BRASCT"}, "O80": {"x": 31.784, "y": 53.809, "company": "LAFINTECA"}, "N83": {"x": 32.843, "y": 52.109, "company": "EFICAZ"}, "O82": {"x": 31.806, "y": 52.109, "company": "INBAZZ"}, "O71": {"x": 30.468, "y": 56.996, "company": "DATAFRETE"}, "P70": {"x": 29.403, "y": 56.994, "company": "SGP"}, "O73": {"x": 30.456, "y": 55.316, "company": "SNAPBOT"}, "P72": {"x": 29.403, "y": 55.314, "company": "PANDORIUM"}, "O81": {"x": 30.48, "y": 53.809, "company": "DOOTAX"}, "P80": {"x": 29.402, "y": 53.807, "company": "HARPIX"}, "O83": {"x": 30.456, "y": 52.087, "company": "SHOPPING"}, "P82": {"x": 29.403, "y": 52.089, "company": "ERP"}, "N91": {"x": 32.843, "y": 50.623, "company": "E-BILLIONS"}, "O90": {"x": 31.791, "y": 50.623, "company": "ECOMMERCE"}, "N93": {"x": 32.832, "y": 48.912, "company": "NAKAROD"}, "O92": {"x": 31.791, "y": 48.909, "company": "NEMU"}, "N101": {"x": 32.808, "y": 47.401, "company": "CREDSELLER"}, "O100": {"x": 31.837, "y": 47.399, "company": "SIZEBAY"}, "N103": {"x": 32.785, "y": 45.693, "company": "IRAHA"}, "O102": {"x": 31.838, "y": 45.715, "company": "SIMFRETE"}, "O91": {"x": 30.468, "y": 50.616, "company": "TEC4U"}, "P90": {"x": 29.403, "y": 50.613, "company": "BR"}, "O93": {"x": 30.445, "y": 48.889, "company": "ECONVERSE"}, "P92": {"x": 29.403, "y": 48.889, "company": "SISFRETE"}, "O101": {"x": 30.421, "y": 47.401, "company": "LOOPIA"}, "P100": {"x": 29.449, "y": 47.399, "company": "CENTRALIZA"}, "O103": {"x": 30.41, "y": 45.715, "company": "ÚTIL"}, "P102": {"x": 29.449, "y": 45.712, "company": "VOLIX"}, "N111": {"x": 32.821, "y": 44.224, "company": "SISTEMAS"}, "O110": {"x": 31.832, "y": 44.221, "company": "SLEEKFLOW"}, "N113": {"x": 32.791, "y": 42.511, "company": "CLIMBA"}, "O112": {"x": 31.832, "y": 42.506, "company": "BARBIERATTO"}, "O111": {"x": 30.445, "y": 44.219, "company": "EITRI"}, "P110": {"x": 29.44, "y": 44.219, "company": "CECPS"}, "O113": {"x": 30.408, "y": 42.511, "company": "SHAKERS"}, "P112": {"x": 29.434, "y": 42.509, "company": "TO"}, "N121": {"x": 32.808, "y": 41.029, "company": "WINNERBOX"}, "O120": {"x": 31.838, "y": 41.026, "company": "MOENGAGE"}, "N123": {"x": 32.785, "y": 39.312, "company": "PREDIZE"}, "O122": {"x": 31.838, "y": 39.303, "company": "EXPERTA"}, "O121": {"x": 30.414, "y": 41.026, "company": "ASSURANT"}, "P120": {"x": 29.44, "y": 41.026, "company": "RETAILON"}, "O123": {"x": 30.414, "y": 39.292, "company": "UOOUSHOP"}, "P122": {"x": 29.449, "y": 39.312, "company": "ROCK"}, "N131": {"x": 32.797, "y": 37.827, "company": "STOKKI"}, "O130": {"x": 31.83, "y": 37.827, "company": "MANGO"}, "N133": {"x": 32.781, "y": 36.103, "company": "TERMO"}, "O132": {"x": 31.83, "y": 36.1, "company": "KYRALY"}, "O131": {"x": 30.426, "y": 37.827, "company": "AFTERSALE"}, "P130": {"x": 29.445, "y": 37.825, "company": "NEOTRUST"}, "O133": {"x": 30.403, "y": 36.1, "company": "SYSMIDDLE"}, "P132": {"x": 29.445, "y": 36.1, "company": "ECHODATA"}, "N141": {"x": 32.781, "y": 34.62, "company": "CONTÁBIL"}, "O140": {"x": 31.829, "y": 34.618, "company": "CERTO"}, "N143": {"x": 32.797, "y": 32.905, "company": "WEI"}, "O142": {"x": 31.829, "y": 32.895, "company": "MAIO"}, "O141": {"x": 30.426, "y": 34.643, "company": "ENTREGO"}, "P140": {"x": 29.455, "y": 34.64, "company": "AMIGO"}, "O143": {"x": 30.414, "y": 32.903, "company": "FLYWHEEL"}, "P142": {"x": 29.445, "y": 32.902, "company": "CLIQUE"}, "B60": {"x": 74.692, "y": 50.649, "company": "IOTA.HUB"}, "A61": {"x": 75.66, "y": 50.649, "company": "BOXLINK"}, "B70": {"x": 74.827, "y": 43.828, "company": ""}, "B50": {"x": 74.692, "y": 55.701, "company": "WIDDE"}, "A51": {"x": 75.66, "y": 55.701, "company": "ONFLY"}, "B40": {"x": 74.692, "y": 62.1, "company": "WAVE"}, "A41": {"x": 75.66, "y": 62.1, "company": "BUDA"}, "B30": {"x": 74.692, "y": 66.82, "company": "ADOPT"}, "A31": {"x": 75.66, "y": 66.82, "company": ""}, "B20": {"x": 74.692, "y": 71.54, "company": "ONLINE"}, "A21": {"x": 76.133, "y": 72.805, "company": ""}, "C60": {"x": 71.66, "y": 48.963, "company": ""}, "B61": {"x": 72.599, "y": 50.649, "company": "BRAVIUM"}, "C50": {"x": 71.66, "y": 55.701, "company": "YOOPER"}, "B51": {"x": 72.599, "y": 55.701, "company": "MARTZ"}, "C40": {"x": 71.66, "y": 60.421, "company": ""}, "B41": {"x": 72.599, "y": 62.1, "company": "BLACKWALL"}, "C30": {"x": 71.66, "y": 66.82, "company": "BOTMAKER"}, "B31": {"x": 72.599, "y": 66.82, "company": "JEDICRM"}, "C20": {"x": 71.66, "y": 71.54, "company": "SMARTENVIOS"}, "B21": {"x": 72.599, "y": 71.54, "company": "KONFIDENCY"}, "C70": {"x": 71.784, "y": 43.836, "company": ""}, "B71": {"x": 72.672, "y": 45.575, "company": "MAGIS5"}, "D60": {"x": 68.604, "y": 48.963, "company": ""}, "C61": {"x": 69.561, "y": 50.649, "company": "MANDAÊ"}, "D50": {"x": 68.604, "y": 54.014, "company": "LOJA"}, "C51": {"x": 69.561, "y": 54.022, "company": "RECLAME"}, "D40": {"x": 68.604, "y": 60.421, "company": ""}, "C41": {"x": 69.561, "y": 62.108, "company": "PARTNER"}, "D30": {"x": 68.604, "y": 66.82, "company": "KWANKO"}, "C31": {"x": 69.561, "y": 66.82, "company": "DINAMIZE"}, "D20": {"x": 68.604, "y": 71.54, "company": "CONVERTR"}, "C21": {"x": 69.561, "y": 71.54, "company": "LATAM"}, "D70": {"x": 68.728, "y": 43.828, "company": "CONNECTLY"}, "C71": {"x": 69.685, "y": 43.836, "company": "VITRIO"}, "E60": {"x": 65.552, "y": 48.963, "company": "MELHOR"}, "D61": {"x": 66.511, "y": 48.963, "company": "CADASTRA"}, "E40": {"x": 65.552, "y": 60.421, "company": "SIGNIFYD"}, "D41": {"x": 66.511, "y": 60.421, "company": "SUPERFRETE"}, "E30": {"x": 65.586, "y": 68.08, "company": "CLEVERTAP"}, "D31": {"x": 66.967, "y": 68.08, "company": "CRITEO"}, "E20": {"x": 65.552, "y": 71.54, "company": "JOOMPULSE"}, "D21": {"x": 66.511, "y": 71.54, "company": "ALGOLIA"}, "E70": {"x": 65.676, "y": 43.828, "company": "OMIE"}, "D71": {"x": 66.635, "y": 43.828, "company": "VENDDOR"}, "D12": {"x": 68.604, "y": 75.079, "company": "JUSPAY"}, "C13": {"x": 69.561, "y": 75.079, "company": "LETS"}, "E10": {"x": 65.552, "y": 76.757, "company": "SURI"}, "D11": {"x": 66.502, "y": 76.757, "company": "ADJUST"}, "F80": {"x": 61.864, "y": 38.7, "company": "CRM"}, "E81": {"x": 62.821, "y": 38.7, "company": "YUNO"}, "F90": {"x": 61.854, "y": 32.998, "company": "DITO"}, "E91": {"x": 63.159, "y": 32.989, "company": "TM"}, "G90": {"x": 58.658, "y": 32.971, "company": "GRUPO"}, "F91": {"x": 59.959, "y": 32.975, "company": "VTEX"}, "H90": {"x": 55.436, "y": 32.96, "company": "ASAAS"}, "G91": {"x": 56.723, "y": 32.975, "company": "KOIN"}, "I90": {"x": 52.2, "y": 32.989, "company": "TOPSORT"}, "I91": {"x": 50.127, "y": 32.98, "company": ""}, "H91": {"x": 53.551, "y": 32.984, "company": "FULL"}, "M90": {"x": 34.465, "y": 32.913, "company": "GLOBO"}, "I20": {"x": 52.235, "y": 69.941, "company": "MADEIRA"}, "H21": {"x": 53.572, "y": 69.929, "company": "SEALED"}, "I10": {"x": 52.124, "y": 76.757, "company": "SAP"}, "H11": {"x": 53.127, "y": 76.757, "company": "INCOMM"}, "F10": {"x": 61.783, "y": 76.757, "company": "BANCO"}, "E11": {"x": 62.732, "y": 76.757, "company": "PICPAY"}, "G10": {"x": 58.598, "y": 76.765, "company": "CONSTRUCTOR"}, "F11": {"x": 59.514, "y": 76.757, "company": "BBM"}, "F20": {"x": 61.83, "y": 72.85, "company": ""}, "E21": {"x": 62.833, "y": 71.581, "company": "XLOW"}, "G20": {"x": 58.674, "y": 69.93, "company": "ANJUN"}, "F21": {"x": 59.611, "y": 71.643, "company": "FRENET"}, "F30": {"x": 61.783, "y": 66.82, "company": "PAGALEVE"}, "E31": {"x": 62.742, "y": 66.82, "company": "IRROBA"}, "G30": {"x": 58.598, "y": 65.141, "company": "BRASIL"}, "F31": {"x": 59.523, "y": 66.82, "company": "HI"}, "F40": {"x": 61.854, "y": 60.512, "company": "LOGGI"}, "E41": {"x": 63.171, "y": 60.522, "company": "ESTOCA"}, "G40": {"x": 58.68, "y": 60.512, "company": "CPLUG"}, "F41": {"x": 59.98, "y": 60.494, "company": "AFTER"}, "M50": {"x": 65.618, "y": 56.379, "company": ""}, "J50": {"x": 48.272, "y": 56.379, "company": ""}, "D10": {"x": 68.604, "y": 76.757, "company": "KNAKASAKI"}, "C11": {"x": 69.552, "y": 76.765, "company": "AZUL"}, "E12": {"x": 65.552, "y": 75.079, "company": "UPSELLER"}, "D13": {"x": 66.511, "y": 75.079, "company": "CNAP"}, "F12": {"x": 61.863, "y": 75.159, "company": "BW"}, "E13": {"x": 62.822, "y": 75.159, "company": "SMART"}, "G12": {"x": 58.678, "y": 75.159, "company": "GOBOTS"}, "F13": {"x": 59.603, "y": 75.159, "company": "ÁGUIA"}, "I12": {"x": 52.203, "y": 75.118, "company": "FULL"}, "H13": {"x": 53.205, "y": 75.162, "company": ""}, "B22": {"x": 74.692, "y": 69.854, "company": "LOPE"}, "C22": {"x": 71.66, "y": 69.854, "company": "WBUY"}, "B23": {"x": 72.599, "y": 69.854, "company": "BONIFIQ"}, "D22": {"x": 68.604, "y": 69.854, "company": "STANDOUT"}, "C23": {"x": 69.561, "y": 69.854, "company": "CONECTA"}, "E22": {"x": 65.552, "y": 69.854, "company": "JOOMPRO"}, "D23": {"x": 66.511, "y": 69.854, "company": "EDRONE"}, "E23": {"x": 62.799, "y": 69.917, "company": "WEB"}, "F23": {"x": 59.583, "y": 69.896, "company": "PRECIFICA"}, "B32": {"x": 74.692, "y": 65.134, "company": "SECONDS"}, "A33": {"x": 75.66, "y": 65.134, "company": "GOLOG"}, "C32": {"x": 71.66, "y": 65.141, "company": "PRECODE"}, "B33": {"x": 72.599, "y": 65.134, "company": "BRANDDI"}, "D32": {"x": 68.604, "y": 65.134, "company": "AWIN"}, "C33": {"x": 69.561, "y": 65.141, "company": "WOOVI"}, "F32": {"x": 61.783, "y": 65.134, "company": "KOBE"}, "E33": {"x": 62.742, "y": 65.134, "company": "OTO"}, "F33": {"x": 59.523, "y": 65.134, "company": "VINDI"}, "B42": {"x": 74.692, "y": 60.421, "company": "AGÊNCIA"}, "A43": {"x": 75.66, "y": 60.421, "company": "SERPRO"}, "B43": {"x": 72.599, "y": 60.421, "company": "GEARSEO"}, "C43": {"x": 69.561, "y": 60.421, "company": "ALLOMNI"}, "B52": {"x": 74.692, "y": 54.014, "company": "HUBIFY"}, "A53": {"x": 75.66, "y": 54.014, "company": "REVI"}, "C52": {"x": 71.66, "y": 54.022, "company": "FRETE"}, "B53": {"x": 72.599, "y": 54.014, "company": "NEOASSIST"}, "B62": {"x": 74.692, "y": 48.963, "company": "MONKS"}, "A63": {"x": 75.66, "y": 48.963, "company": "LEROY"}, "B63": {"x": 72.599, "y": 48.963, "company": "WEBPRICE"}, "C63": {"x": 69.561, "y": 48.963, "company": "SCORE"}, "B73": {"x": 72.675, "y": 43.866, "company": "FLOWERBIZ"}, "J3": {"x": 53.137, "y": 75.714, "company": "FLEX"}, "P3101": {"x": 23.992, "y": 56.441, "company": "MULTIAGENTS"}, "P3103": {"x": 24.488, "y": 56.441, "company": "HOUSE"}, "P3113": {"x": 23.992, "y": 52.398, "company": "D2C"}, "P3121": {"x": 24.474, "y": 50.366, "company": "TECH"}, "P3131": {"x": 24.008, "y": 46.327, "company": "ROJEMAC"}, "P3133": {"x": 24.474, "y": 46.327, "company": "IDWORKS"}};
 const IMG_W = 4768, IMG_H = 3368;
 
-// ── REDE DE CORREDORES ────────────────────────────────────
-// Corredores verticais (x %) – entre colunas de stands
-const VX = [21, 25, 28.5, 31.5, 34.5, 37.5, 42, 46, 50.5, 54, 58, 62, 66, 70, 73.5, 77];
-// Corredores horizontais (y %) – entre linhas de stands
-const HY = [19, 26, 30, 35, 40, 45, 50, 57, 62, 65, 69, 74, 80];
+// ── CORRIDOR NETWORK (real positions from PDF labels) ──────
+// Vertical corridors = streets A-P (x %, extracted from PDF)
+// These are the EXACT positions of the named corridors in the fair
+const STREETS = {
+  'P': 28.63, 'O': 31.14, 'N': 33.0, 'M': 35.0,
+  'L': 36.85, 'K': 42.25, 'J': 47.4,
+  'I': 51.38, 'H': 54.46, 'G': 57.64,
+  'F': 60.79, 'E': 64.4, 'D': 67.77,
+  'C': 70.77, 'B': 73.83, 'A': 76.9,
+  '_LEFT': 21.0, '_RIGHT': 80.0
+};
+const VX = Object.values(STREETS).sort((a,b)=>a-b);
 
+// Horizontal corridors (y %) — between row groups
+// Derived from stand y-positions + main aisle at 56.56%
+const HY = [19, 26, 31, 36, 41, 46, 52, 56.56, 59.5, 63.5, 67.5, 72.5, 78, 84];
+
+// Build waypoint graph
 const waypoints = [];
-const wpMap = {};
-VX.forEach((x, vi) => {
-  HY.forEach((y, hi) => {
-    wpMap[vi + '_' + hi] = waypoints.length;
-    waypoints.push({x, y});
-  });
-});
-
-const graph = Array.from({length: waypoints.length}, () => []);
-function wpIdx(vi, hi) {
+const wpIdx = (vi,hi) => {
   if(vi<0||vi>=VX.length||hi<0||hi>=HY.length) return -1;
-  return wpMap[vi + '_' + hi];
-}
-for(let vi=0; vi<VX.length; vi++) {
-  for(let hi=0; hi<HY.length; hi++) {
-    const cur = wpIdx(vi,hi);
-    if(vi+1 < VX.length) {
+  return vi*HY.length + hi;
+};
+for(let vi=0;vi<VX.length;vi++)
+  for(let hi=0;hi<HY.length;hi++)
+    waypoints.push({x:VX[vi], y:HY[hi]});
+
+const graph = Array.from({length:waypoints.length},()=>[]);
+for(let vi=0;vi<VX.length;vi++) {
+  for(let hi=0;hi<HY.length;hi++) {
+    const cur=wpIdx(vi,hi);
+    if(vi+1<VX.length) {
       const r=wpIdx(vi+1,hi), d=Math.abs(VX[vi+1]-VX[vi]);
       graph[cur].push({to:r,cost:d}); graph[r].push({to:cur,cost:d});
     }
-    if(hi+1 < HY.length) {
-      const d2=wpIdx(vi,hi+1), d=Math.abs(HY[hi+1]-HY[hi]);
-      graph[cur].push({to:d2,cost:d}); graph[d2].push({to:cur,cost:d});
+    if(hi+1<HY.length) {
+      const dn=wpIdx(vi,hi+1), d=Math.abs(HY[hi+1]-HY[hi]);
+      graph[cur].push({to:dn,cost:d}); graph[dn].push({to:cur,cost:d});
     }
   }
 }
 
-function nearestWP(x,y) {
-  let best=-1, bd=Infinity;
-  waypoints.forEach((wp,i) => { const d=Math.hypot(wp.x-x, wp.y-y); if(d<bd){bd=d;best=i;} });
-  return best;
+// For each stand, find its corridor (nearest vertical street)
+// and nearest horizontal corridor level
+function standToWP(s) {
+  // Find nearest vertical corridor
+  let bestV=0, bestVd=Infinity;
+  VX.forEach((x,i)=>{const d=Math.abs(x-s.x); if(d<bestVd){bestVd=d;bestV=i;}});
+  // Find nearest horizontal corridor
+  let bestH=0, bestHd=Infinity;
+  HY.forEach((y,i)=>{const d=Math.abs(y-s.y); if(d<bestHd){bestHd=d;bestH=i;}});
+  return wpIdx(bestV, bestH);
 }
 
-function aStar(s, g) {
-  const h = i => Math.hypot(waypoints[i].x-waypoints[g].x, waypoints[i].y-waypoints[g].y);
-  const open=new Set([s]);
+function aStar(start, goal) {
+  const h=i=>Math.hypot(waypoints[i].x-waypoints[goal].x, waypoints[i].y-waypoints[goal].y);
+  const open=new Set([start]);
   const gS=new Array(waypoints.length).fill(Infinity);
   const fS=new Array(waypoints.length).fill(Infinity);
   const prev=new Array(waypoints.length).fill(-1);
-  gS[s]=0; fS[s]=h(s);
+  gS[start]=0; fS[start]=h(start);
   while(open.size>0) {
     let cur=[...open].reduce((a,b)=>fS[a]<fS[b]?a:b);
-    if(cur===g) {
+    if(cur===goal){
       const path=[]; while(cur!==-1){path.unshift(cur);cur=prev[cur];} return path;
     }
     open.delete(cur);
@@ -199,32 +209,61 @@ function aStar(s, g) {
 function calcRoute(idA, idB) {
   const sA=STANDS[idA], sB=STANDS[idB];
   if(!sA||!sB) return null;
-  const wpA=nearestWP(sA.x,sA.y), wpB=nearestWP(sB.x,sB.y);
+
+  const wpA=standToWP({x:sA.x,y:sA.y});
+  const wpB=standToWP({x:sB.x,y:sB.y});
+
+  // If same waypoint, route is direct
+  if(wpA===wpB) return [{x:sA.x,y:sA.y},{x:sB.x,y:sB.y}];
+
   const path=aStar(wpA,wpB);
+  if(!path.length) return null;
+
+  // Build route: stand → entry corridor pt → corridor path → exit corridor pt → stand
   const pts=[{x:sA.x,y:sA.y}];
-  path.forEach(i=>pts.push({x:waypoints[i].x,y:waypoints[i].y}));
-  pts.push({x:sB.x,y:sB.y});
-  return pts;
+
+  // Entry: go to nearest street at stand's y level, then to waypoint
+  const wpApos=waypoints[path[0]];
+  pts.push({x:wpApos.x, y:sA.y});   // move horizontally to corridor
+  pts.push({x:wpApos.x, y:wpApos.y}); // move vertically in corridor
+
+  // Middle waypoints
+  for(let i=1;i<path.length-1;i++) pts.push({x:waypoints[path[i]].x, y:waypoints[path[i]].y});
+
+  // Exit: from last waypoint to stand
+  const wpBpos=waypoints[path[path.length-1]];
+  pts.push({x:wpBpos.x, y:wpBpos.y});
+  pts.push({x:wpBpos.x, y:sB.y});   // move vertically in corridor to stand row
+  pts.push({x:sB.x, y:sB.y});        // move horizontally to stand
+
+  // Simplify: remove duplicate points
+  const simplified=[pts[0]];
+  for(let i=1;i<pts.length;i++) {
+    const prev=simplified[simplified.length-1];
+    if(Math.abs(pts[i].x-prev.x)>0.1 || Math.abs(pts[i].y-prev.y)>0.1)
+      simplified.push(pts[i]);
+  }
+  return simplified;
 }
 
-// ── ZOOM & PAN ────────────────────────────────────────────
+// ── ZOOM & PAN ─────────────────────────────────────────────
 let scale=1;
 const vp=document.getElementById('map-viewport');
 const inner=document.getElementById('map-inner');
 
-function applyScale(s) {
+function applyScale(s){
   scale=Math.max(0.12,Math.min(5,s));
   inner.style.transform='scale('+scale+')';
 }
 function zoomIn(){applyScale(scale*1.3);}
 function zoomOut(){applyScale(scale/1.3);}
-function zoomFit() {
+function zoomFit(){
   const r=vp.getBoundingClientRect();
-  applyScale(Math.min(r.width/IMG_W, r.height/IMG_H)*0.97);
-  vp.scrollLeft=0; vp.scrollTop=0;
+  applyScale(Math.min(r.width/IMG_W,r.height/IMG_H)*0.97);
+  vp.scrollLeft=0;vp.scrollTop=0;
 }
 
-vp.addEventListener('wheel', e => {
+vp.addEventListener('wheel',e=>{
   e.preventDefault();
   const rect=vp.getBoundingClientRect();
   const mx=e.clientX-rect.left+vp.scrollLeft;
@@ -234,52 +273,42 @@ vp.addEventListener('wheel', e => {
   const ratio=scale/prev;
   vp.scrollLeft=mx*ratio-(e.clientX-rect.left);
   vp.scrollTop=my*ratio-(e.clientY-rect.top);
-}, {passive:false});
+},{passive:false});
 
 let drag=null;
-vp.addEventListener('mousedown', e => {
+vp.addEventListener('mousedown',e=>{
   if(e.target.classList.contains('stand-dot')||e.target.closest('#tooltip')) return;
-  drag={x:e.clientX+vp.scrollLeft, y:e.clientY+vp.scrollTop};
+  drag={x:e.clientX+vp.scrollLeft,y:e.clientY+vp.scrollTop};
 });
-window.addEventListener('mousemove', e => {
-  if(!drag) return;
-  vp.scrollLeft=drag.x-e.clientX;
-  vp.scrollTop=drag.y-e.clientY;
-});
-window.addEventListener('mouseup', ()=>drag=null);
+window.addEventListener('mousemove',e=>{if(!drag)return;vp.scrollLeft=drag.x-e.clientX;vp.scrollTop=drag.y-e.clientY;});
+window.addEventListener('mouseup',()=>drag=null);
 
-// Touch pan/zoom
+// Touch
 let touches={};
-vp.addEventListener('touchstart', e => {
-  [...e.changedTouches].forEach(t=>touches[t.identifier]={x:t.clientX,y:t.clientY});
-});
-vp.addEventListener('touchmove', e => {
+vp.addEventListener('touchstart',e=>{[...e.changedTouches].forEach(t=>touches[t.identifier]={x:t.clientX,y:t.clientY});});
+vp.addEventListener('touchmove',e=>{
   e.preventDefault();
-  if(e.touches.length===2) {
+  if(e.touches.length===2){
     const [a,b]=[e.touches[0],e.touches[1]];
     const dist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
     if(touches._pinchDist) applyScale(scale*dist/touches._pinchDist);
     touches._pinchDist=dist;
-  } else if(e.touches.length===1) {
-    const t=e.touches[0];
-    const prev=touches[t.identifier];
+  } else if(e.touches.length===1){
+    const t=e.touches[0],prev=touches[t.identifier];
     if(prev){vp.scrollLeft-=t.clientX-prev.x;vp.scrollTop-=t.clientY-prev.y;}
     touches[t.identifier]={x:t.clientX,y:t.clientY};
   }
-}, {passive:false});
-vp.addEventListener('touchend', e => {
-  [...e.changedTouches].forEach(t=>delete touches[t.identifier]);
-  if(e.touches.length<2) delete touches._pinchDist;
-});
+},{passive:false});
+vp.addEventListener('touchend',e=>{[...e.changedTouches].forEach(t=>delete touches[t.identifier]);if(e.touches.length<2)delete touches._pinchDist;});
 
 // ── MARKERS ───────────────────────────────────────────────
-let originId=null, destId=null;
+let originId=null,destId=null;
 const markerEls={};
 const layer=document.getElementById('markers-layer');
 const svg=document.getElementById('svg-overlay');
 
-function createMarkers() {
-  Object.entries(STANDS).forEach(([id,s]) => {
+function createMarkers(){
+  Object.entries(STANDS).forEach(([id,s])=>{
     const el=document.createElement('div');
     el.className='stand-marker';
     el.dataset.id=id;
@@ -288,114 +317,107 @@ function createMarkers() {
     const dot=document.createElement('div');
     dot.className='stand-dot';
     el.appendChild(dot);
-    el.addEventListener('mouseenter', ev=>showTip(ev,id));
-    el.addEventListener('mouseleave', hideTip);
-    el.addEventListener('click', ()=>handleMarkerClick(id));
+    el.addEventListener('mouseenter',ev=>showTip(ev,id));
+    el.addEventListener('mouseleave',hideTip);
+    el.addEventListener('click',()=>handleClick(id));
     layer.appendChild(el);
     markerEls[id]=el;
   });
   document.getElementById('stand-count').textContent=
-    '📦 '+Object.keys(STANDS).length+' stands mapeados — clique num stand ou busque acima';
+    '📦 '+Object.keys(STANDS).length+' stands mapeados — clique para definir origem e destino';
 }
 
 // ── TOOLTIP ───────────────────────────────────────────────
 const tooltip=document.getElementById('tooltip');
 let hoverId=null;
-function showTip(e,id) {
+function showTip(e,id){
   hoverId=id;
   const s=STANDS[id];
   document.getElementById('tip-id').textContent=id;
   document.getElementById('tip-co').textContent=s.company||'Stand '+id;
   tooltip.style.display='block';
-  positionTip(e);
+  posTip(e);
 }
-function positionTip(e) {
-  let x=e.clientX+14, y=e.clientY-10;
-  if(x+220>window.innerWidth)  x=e.clientX-230;
-  if(y+120>window.innerHeight) y=e.clientY-130;
-  tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
+function posTip(e){
+  let x=e.clientX+14,y=e.clientY-10;
+  if(x+230>window.innerWidth) x=e.clientX-240;
+  if(y+110>window.innerHeight) y=e.clientY-120;
+  tooltip.style.left=x+'px';tooltip.style.top=y+'px';
 }
-document.addEventListener('mousemove', e=>{ if(hoverId) positionTip(e); });
+document.addEventListener('mousemove',e=>{if(hoverId)posTip(e);});
 function hideTip(){tooltip.style.display='none';hoverId=null;}
+document.getElementById('tip-from-btn').onclick=()=>{if(hoverId){setOrigin(hoverId);hideTip();}};
+document.getElementById('tip-to-btn').onclick=()=>{if(hoverId){setDest(hoverId);hideTip();}};
 
-document.getElementById('tip-from-btn').onclick=()=>{ if(hoverId){setOrigin(hoverId);hideTip();} };
-document.getElementById('tip-to-btn').onclick=()=>{ if(hoverId){setDest(hoverId);hideTip();} };
-
-function handleMarkerClick(id) {
-  if(!originId) { setOrigin(id); return; }
-  if(!destId && id!==originId) { setDest(id); doRoute(); return; }
+function handleClick(id){
+  if(!originId){setOrigin(id);return;}
+  if(!destId&&id!==originId){setDest(id);doRoute();}
 }
 
-// ── ORIGEM / DESTINO ──────────────────────────────────────
-function setOrigin(id) {
+// ── SELECTION ─────────────────────────────────────────────
+function setOrigin(id){
   if(originId) markerEls[originId]?.classList.remove('origin');
   originId=id;
   markerEls[id].classList.add('origin');
   document.getElementById('inp-from').value=fmtStand(id);
 }
-function setDest(id) {
+function setDest(id){
   if(destId) markerEls[destId]?.classList.remove('destination');
   destId=id;
   markerEls[id].classList.add('destination');
   document.getElementById('inp-to').value=fmtStand(id);
 }
-function fmtStand(id) {
+function fmtStand(id){
   const co=STANDS[id]?.company;
-  return co ? id+' – '+co : id;
+  return co?id+' – '+co:id;
 }
 
-// ── DRAW ROUTE ────────────────────────────────────────────
-function drawRoute(pts, fromId, toId) {
+// ── DRAW ──────────────────────────────────────────────────
+function drawRoute(pts,fromId,toId){
   svg.innerHTML='';
   if(!pts||pts.length<2) return;
   const px=p=>(p.x/100*IMG_W)+','+(p.y/100*IMG_H);
   const d='M '+pts.map(px).join(' L ');
 
   const bg=document.createElementNS('http://www.w3.org/2000/svg','path');
-  bg.setAttribute('d',d); bg.setAttribute('class','route-bg'); svg.appendChild(bg);
+  bg.setAttribute('d',d);bg.setAttribute('class','route-bg');svg.appendChild(bg);
 
   const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-  path.setAttribute('d',d); path.setAttribute('class','route-path'); svg.appendChild(path);
+  path.setAttribute('d',d);path.setAttribute('class','route-path');svg.appendChild(path);
 
-  function pin(x,y,fill,label) {
+  function pin(px,py,fill,label){
     const g=document.createElementNS('http://www.w3.org/2000/svg','g');
     const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',12);
+    c.setAttribute('cx',px);c.setAttribute('cy',py);c.setAttribute('r',11);
     c.setAttribute('fill',fill);c.setAttribute('class','pin-anim');g.appendChild(c);
     const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',x);t.setAttribute('y',y-20);t.setAttribute('text-anchor','middle');
+    t.setAttribute('x',px);t.setAttribute('y',py-18);t.setAttribute('text-anchor','middle');
     t.setAttribute('fill',fill);t.setAttribute('font-size','22');t.setAttribute('font-weight','800');
-    t.setAttribute('font-family','Arial, sans-serif');
+    t.setAttribute('font-family','Arial,sans-serif');
     t.setAttribute('paint-order','stroke');t.setAttribute('stroke','#000');t.setAttribute('stroke-width','4');
     t.textContent=label;g.appendChild(t);svg.appendChild(g);
   }
-
-  const sx=pts[0].x/100*IMG_W, sy=pts[0].y/100*IMG_H;
-  const ex=pts[pts.length-1].x/100*IMG_W, ey=pts[pts.length-1].y/100*IMG_H;
-  pin(sx,sy,'#48bb78',fromId);
-  pin(ex,ey,'#ed8936',toId);
+  pin(pts[0].x/100*IMG_W,pts[0].y/100*IMG_H,'#48bb78',fromId);
+  pin(pts[pts.length-1].x/100*IMG_W,pts[pts.length-1].y/100*IMG_H,'#ed8936',toId);
 }
 
-// ── ROTA ─────────────────────────────────────────────────
-function doRoute() {
+// ── ROUTE ─────────────────────────────────────────────────
+function doRoute(){
   const from=resolveInput(document.getElementById('inp-from').value);
-  const to  =resolveInput(document.getElementById('inp-to').value);
+  const to=resolveInput(document.getElementById('inp-to').value);
   if(!from){alert('Stand de origem não encontrado.');return;}
-  if(!to)  {alert('Stand de destino não encontrado.');return;}
-  setOrigin(from); setDest(to);
+  if(!to){alert('Stand de destino não encontrado.');return;}
+  setOrigin(from);setDest(to);
   const pts=calcRoute(from,to);
   if(!pts){alert('Não foi possível calcular a rota.');return;}
   drawRoute(pts,from,to);
 
-  // Distance estimate (scale: map ~660m wide, ~540m tall at real scale)
   let dist=0;
-  for(let i=1;i<pts.length;i++) {
+  for(let i=1;i<pts.length;i++)
     dist+=Math.hypot((pts[i].x-pts[i-1].x)/100*660,(pts[i].y-pts[i-1].y)/100*540);
-  }
   document.getElementById('route-info').textContent=
     '✅ '+from+' → '+to+' | ~'+Math.round(dist)+'m de percurso';
 
-  // Center view on midpoint
   const mx=(STANDS[from].x+STANDS[to].x)/2/100*IMG_W*scale;
   const my=(STANDS[from].y+STANDS[to].y)/2/100*IMG_H*scale;
   const r=vp.getBoundingClientRect();
@@ -403,9 +425,9 @@ function doRoute() {
   vp.scrollTop=my-r.height/2;
 }
 
-function clearRoute() {
+function clearRoute(){
   if(originId) markerEls[originId]?.classList.remove('origin');
-  if(destId)   markerEls[destId]?.classList.remove('destination');
+  if(destId) markerEls[destId]?.classList.remove('destination');
   originId=destId=null;
   svg.innerHTML='';
   document.getElementById('inp-from').value='';
@@ -413,7 +435,7 @@ function clearRoute() {
   document.getElementById('route-info').textContent='';
 }
 
-function resolveInput(val) {
+function resolveInput(val){
   val=val.trim().toUpperCase().split('–')[0].split('-')[0].trim();
   if(!val) return null;
   if(STANDS[val]) return val;
@@ -426,10 +448,10 @@ function resolveInput(val) {
 }
 
 // ── AUTOCOMPLETE ──────────────────────────────────────────
-function setupAC(inpId, acId, onSelect) {
+function setupAC(inpId,acId,onSelect){
   const inp=document.getElementById(inpId);
   const list=document.getElementById(acId);
-  inp.addEventListener('input', ()=>{
+  inp.addEventListener('input',()=>{
     const q=inp.value.trim().toLowerCase();
     if(q.length<1){list.style.display='none';return;}
     const matches=Object.entries(STANDS)
@@ -442,43 +464,29 @@ function setupAC(inpId, acId, onSelect) {
     ).join('');
     list.style.display='block';
     list.querySelectorAll('.ac-item').forEach(item=>{
-      item.addEventListener('mousedown', e=>{
-        e.preventDefault();
-        onSelect(item.dataset.id);
-        list.style.display='none';
+      item.addEventListener('mousedown',e=>{
+        e.preventDefault();onSelect(item.dataset.id);list.style.display='none';
       });
     });
   });
-  inp.addEventListener('blur', ()=>setTimeout(()=>list.style.display='none',150));
+  inp.addEventListener('blur',()=>setTimeout(()=>list.style.display='none',150));
 }
 
-setupAC('inp-from','ac-from', id=>{
-  document.getElementById('inp-from').value=fmtStand(id);
-  setOrigin(id);
-});
-setupAC('inp-to','ac-to', id=>{
-  document.getElementById('inp-to').value=fmtStand(id);
-  setDest(id);
-});
-
+setupAC('inp-from','ac-from',id=>{document.getElementById('inp-from').value=fmtStand(id);setOrigin(id);});
+setupAC('inp-to','ac-to',id=>{document.getElementById('inp-to').value=fmtStand(id);setDest(id);});
 document.getElementById('inp-from').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('inp-to').focus();});
 document.getElementById('inp-to').addEventListener('keydown',e=>{if(e.key==='Enter')doRoute();});
 
 // ── INIT ──────────────────────────────────────────────────
 const mapImg=document.getElementById('map-img');
-
-function initMap() {
-  svg.setAttribute('width',IMG_W);
-  svg.setAttribute('height',IMG_H);
-  svg.style.width=IMG_W+'px';
-  svg.style.height=IMG_H+'px';
+function initMap(){
+  svg.setAttribute('width',IMG_W);svg.setAttribute('height',IMG_H);
+  svg.style.width=IMG_W+'px';svg.style.height=IMG_H+'px';
   layer.style.cssText='position:absolute;top:0;left:0;width:'+IMG_W+'px;height:'+IMG_H+'px;';
   createMarkers();
   zoomFit();
 }
-
-if(mapImg.complete) initMap();
-else mapImg.addEventListener('load',initMap);
+if(mapImg.complete) initMap(); else mapImg.addEventListener('load',initMap);
 </script>
 </body>
 </html>
