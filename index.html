@@ -8,74 +8,71 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;touch-action:none;user-select:none}
 
-/* === PANEL === */
+/* === PANEL (Google Maps style) === */
 #panel{
   position:fixed;top:0;left:0;right:0;z-index:200;
   background:rgba(255,255,255,0.97);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid #ececec;
-  padding:10px 14px 8px;
-  box-shadow:0 2px 16px rgba(0,0,0,0.07);
+  padding:10px 14px 10px;
+  box-shadow:0 2px 16px rgba(0,0,0,0.09);
 }
-.logo{font-size:12px;font-weight:700;color:#e74c3c;letter-spacing:.5px;margin-bottom:8px;opacity:.8}
-.fields{display:flex;gap:7px;align-items:center}
+.logo{font-size:11px;font-weight:700;color:#e74c3c;letter-spacing:.5px;margin-bottom:8px;opacity:.75;text-transform:uppercase}
+
+/* Campos empilhados estilo Maps */
+.fields-stack{display:flex;flex-direction:column;gap:6px}
+.field-row{display:flex;gap:8px;align-items:center}
 .field-wrap{flex:1;position:relative;min-width:0}
+.field-line{display:flex;flex-direction:column;align-items:center;padding:2px 0;gap:3px;flex-shrink:0}
+.field-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.field-vline{width:2px;height:10px;background:#ddd;border-radius:1px}
 .search-inp{
-  width:100%;padding:9px 12px 9px 36px;
-  border:1.5px solid #e0e0e0;border-radius:10px;
-  font-size:13px;outline:none;background:#f7f7f7;
-  transition:border-color .2s,background .2s;
+  width:100%;padding:10px 12px 10px 14px;
+  border:1.5px solid #e8e8e8;border-radius:10px;
+  font-size:14px;outline:none;background:#f5f5f5;
+  transition:border-color .2s,background .2s,box-shadow .2s;
   color:#1a1a1a;
 }
-.search-inp::placeholder{color:#aaa}
-.search-inp:focus{border-color:#e74c3c;background:#fff}
-.field-icon{
-  position:absolute;left:10px;top:50%;transform:translateY(-50%);
-  font-size:15px;pointer-events:none;
-}
+.search-inp::placeholder{color:#aaa;font-size:13px}
+.search-inp:focus{border-color:#e74c3c;background:#fff;box-shadow:0 0 0 3px rgba(231,76,60,0.08)}
 .dropdown{
   position:absolute;top:calc(100% + 5px);left:0;right:0;
   background:#fff;border-radius:12px;
-  box-shadow:0 6px 30px rgba(0,0,0,0.13);
-  max-height:250px;overflow-y:auto;z-index:300;
-  border:1px solid #efefef;
+  box-shadow:0 8px 32px rgba(0,0,0,0.15);
+  max-height:260px;overflow-y:auto;z-index:300;
+  border:1px solid #eee;
 }
 .dd-item{
-  padding:9px 13px;cursor:pointer;
-  font-size:13px;border-bottom:1px solid #f4f4f4;
-  display:flex;flex-direction:column;gap:1px;
+  padding:10px 14px;cursor:pointer;
+  font-size:13px;border-bottom:1px solid #f3f3f3;
+  display:flex;flex-direction:column;gap:2px;
+  transition:background .12s;
 }
 .dd-item:last-child{border-bottom:none}
 .dd-item:hover,.dd-item.hi{background:#fff5f5}
-.dd-code{font-weight:700;color:#e74c3c;font-size:11px}
-.dd-name{color:#333;font-size:13px}
+.dd-code{font-weight:700;color:#e74c3c;font-size:11px;text-transform:uppercase}
+.dd-name{color:#222;font-size:13px;font-weight:500}
+.btn-row{display:flex;justify-content:flex-end;margin-top:6px}
 .btn-route{
-  flex-shrink:0;padding:9px 15px;
+  padding:10px 20px;
   background:#e74c3c;color:#fff;
   border:none;border-radius:10px;
   font-size:13px;font-weight:700;
-  cursor:pointer;transition:opacity .2s,transform .1s;
+  cursor:pointer;transition:opacity .2s,transform .1s,box-shadow .2s;
   white-space:nowrap;
+  box-shadow:0 2px 8px rgba(231,76,60,0.25);
 }
-.btn-route:active{transform:scale(.96)}
-.btn-route:disabled{opacity:.35;cursor:not-allowed}
+.btn-route:hover{box-shadow:0 4px 14px rgba(231,76,60,0.35)}
+.btn-route:active{transform:scale(.96);box-shadow:none}
+.btn-route:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
 #status{font-size:11px;color:#999;margin-top:6px;text-align:center;line-height:1.4;min-height:14px}
-#status.ok{color:#27ae60}
+#status.ok{color:#27ae60;font-weight:600}
 #status.err{color:#e74c3c}
 
 /* === VIEWPORT === */
-#vp{
-  position:fixed;inset:0;overflow:hidden;
-  cursor:grab;
-}
+#vp{position:fixed;inset:0;overflow:hidden;cursor:grab}
 #vp.grabbing{cursor:grabbing}
-
-/* Map space */
-#ms{
-  position:absolute;
-  transform-origin:0 0;
-  will-change:transform;
-}
+#ms{position:absolute;transform-origin:0 0;will-change:transform}
 #mw{position:relative;line-height:0}
 #map-img{display:block;width:100%;height:auto}
 #cv{position:absolute;inset:0;pointer-events:none}
@@ -85,7 +82,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:-ap
 .mk-pin{
   position:absolute;transform:translate(-50%,-100%);
   pointer-events:none;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));
 }
 .mk-pin svg{display:block}
 
@@ -95,58 +92,69 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:-ap
   display:flex;flex-direction:column;gap:5px;
 }
 .zb{
-  width:38px;height:38px;border:1px solid #ddd;
-  background:rgba(255,255,255,.95);border-radius:9px;
+  width:40px;height:40px;border:1px solid #ddd;
+  background:rgba(255,255,255,.96);border-radius:10px;
   font-size:18px;font-weight:700;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);
-  color:#333;transition:background .15s;
+  cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);
+  color:#333;transition:background .15s,border-color .15s;
 }
 .zb:hover{background:#fff5f5;color:#e74c3c;border-color:#e74c3c}
 
 /* === LEGEND === */
 #legend{
   position:fixed;left:14px;bottom:24px;z-index:150;
-  background:rgba(255,255,255,.95);border:1px solid #ececec;
-  border-radius:10px;padding:8px 12px;
+  background:rgba(255,255,255,.96);border:1px solid #ececec;
+  border-radius:10px;padding:8px 13px;
   font-size:11px;color:#555;
   box-shadow:0 2px 8px rgba(0,0,0,.08);
-  max-width:160px;
 }
-.leg-row{display:flex;align-items:center;gap:7px;margin-top:3px}
-.leg-dash{width:22px;height:3px;border-top:2px dashed;}
+.leg-row{display:flex;align-items:center;gap:7px;margin-top:4px}
+.leg-dash{width:22px;height:3px;border-top:2.5px dashed}
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 
 /* Mobile */
 @media(max-width:640px){
   .logo{display:none}
-  #panel{padding:8px 10px 6px}
-  .fields{gap:5px}
-  .search-inp{padding:8px 10px 8px 32px;font-size:12px}
-  .field-icon{left:8px;font-size:13px}
-  .btn-route{padding:8px 11px;font-size:12px}
+  #panel{padding:8px 10px 8px}
+  .search-inp{padding:9px 10px 9px 12px;font-size:13px}
+  .btn-route{padding:9px 16px;font-size:13px}
   #legend{display:none}
+  .field-dot{width:10px;height:10px}
 }
 </style>
 </head>
 <body>
 
 <div id="panel">
-  <div class="logo">FÓRUM E-COMMERCE BRASIL 2026</div>
-  <div class="fields">
-    <div class="field-wrap" id="fw-a">
-      <span class="field-icon">🟢</span>
-      <input class="search-inp" id="inp-a" placeholder="Origem: stand ou área…" autocomplete="off" spellcheck="false">
-      <div class="dropdown" id="dd-a" style="display:none"></div>
+  <div class="logo">Fórum E-Commerce Brasil 2026</div>
+  <div class="fields-stack">
+    <!-- Origem -->
+    <div class="field-row">
+      <div class="field-line">
+        <div class="field-dot" style="background:#27ae60;border:2px solid #fff;box-shadow:0 0 0 2px #27ae60"></div>
+        <div class="field-vline"></div>
+      </div>
+      <div class="field-wrap" id="fw-a">
+        <input class="search-inp" id="inp-a" placeholder="Origem — stand, empresa ou área" autocomplete="off" spellcheck="false">
+        <div class="dropdown" id="dd-a" style="display:none"></div>
+      </div>
     </div>
-    <div class="field-wrap" id="fw-b">
-      <span class="field-icon">🔴</span>
-      <input class="search-inp" id="inp-b" placeholder="Destino: stand ou área…" autocomplete="off" spellcheck="false">
-      <div class="dropdown" id="dd-b" style="display:none"></div>
+    <!-- Destino -->
+    <div class="field-row">
+      <div class="field-line">
+        <div class="field-dot" style="background:#e74c3c;border:2px solid #fff;box-shadow:0 0 0 2px #e74c3c"></div>
+      </div>
+      <div class="field-wrap" id="fw-b">
+        <input class="search-inp" id="inp-b" placeholder="Destino — stand, empresa ou área" autocomplete="off" spellcheck="false">
+        <div class="dropdown" id="dd-b" style="display:none"></div>
+      </div>
     </div>
-    <button class="btn-route" id="btn-r" disabled onclick="calcRoute()">Rota ↗</button>
   </div>
-  <div id="status">Busque um stand, plenária, banheiro ou outra área</div>
+  <div class="btn-row">
+    <button class="btn-route" id="btn-r" disabled onclick="calcRoute()">Traçar rota ↗</button>
+  </div>
+  <div id="status">Busque um stand, empresa, plenária, banheiro…</div>
 </div>
 
 <div id="vp">
@@ -176,44 +184,34 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:-ap
 // ======================================================
 // DATA
 // ======================================================
-const STANDS = {"A31":{"x":82.03,"y":67.192,"company":"Star Live"},"A33":{"x":82.03,"y":65.509,"company":""},"A41":{"x":82.03,"y":62.479,"company":""},"A43":{"x":82.03,"y":60.795,"company":"Serpro"},"A51":{"x":82.03,"y":56.756,"company":""},"A53":{"x":82.03,"y":55.072,"company":"Revi"},"A61":{"x":82.03,"y":51.032,"company":""},"A63":{"x":82.03,"y":49.348,"company":""},"B20":{"x":81.078,"y":71.906,"company":""},"B21":{"x":78.994,"y":71.906,"company":""},"B22":{"x":81.078,"y":70.222,"company":""},"B23":{"x":78.994,"y":70.222,"company":"BonifiQ"},"B30":{"x":81.078,"y":67.192,"company":""},"B31":{"x":78.994,"y":67.192,"company":""},"B32":{"x":81.078,"y":65.509,"company":""},"B33":{"x":78.994,"y":65.509,"company":"Branddi"},"B40":{"x":81.078,"y":62.479,"company":""},"B41":{"x":78.994,"y":62.479,"company":""},"B42":{"x":81.078,"y":60.795,"company":""},"B43":{"x":78.994,"y":60.795,"company":""},"B50":{"x":81.078,"y":56.756,"company":"Widde"},"B51":{"x":78.994,"y":56.756,"company":"Martz"},"B52":{"x":81.078,"y":55.072,"company":""},"B53":{"x":78.994,"y":55.072,"company":""},"B60":{"x":81.078,"y":51.032,"company":""},"B61":{"x":78.994,"y":51.032,"company":""},"B62":{"x":81.078,"y":49.348,"company":""},"B63":{"x":78.994,"y":49.348,"company":""},"B71":{"x":78.994,"y":45.814,"company":"Magis5"},"B73":{"x":78.994,"y":44.13,"company":"IKESAKI"},"C11":{"x":75.947,"y":77.124,"company":"Azul"},"C13":{"x":75.947,"y":75.44,"company":""},"C20":{"x":78.043,"y":71.906,"company":""},"C21":{"x":75.959,"y":71.906,"company":""},"C22":{"x":78.043,"y":70.222,"company":""},"C23":{"x":75.959,"y":70.222,"company":""},"C30":{"x":78.043,"y":67.192,"company":""},"C31":{"x":75.959,"y":67.192,"company":""},"C32":{"x":78.043,"y":65.509,"company":""},"C33":{"x":75.959,"y":65.509,"company":""},"C40":{"x":78.043,"y":60.795,"company":""},"C41":{"x":75.959,"y":62.479,"company":""},"C43":{"x":75.959,"y":60.795,"company":""},"C50":{"x":78.043,"y":56.756,"company":""},"C51":{"x":75.959,"y":55.072,"company":""},"C52":{"x":78.043,"y":55.072,"company":""},"C60":{"x":78.043,"y":49.348,"company":"Vindi"},"C61":{"x":75.959,"y":51.032,"company":"Manda\u00ea"},"C63":{"x":75.959,"y":49.348,"company":""},"C70":{"x":78.043,"y":44.13,"company":"Go Deep"},"C71":{"x":75.959,"y":44.13,"company":"Connectly.ai"},"D10":{"x":74.996,"y":77.124,"company":"Knakasaki"},"D11":{"x":72.919,"y":77.124,"company":"Adjust"},"D12":{"x":74.996,"y":75.44,"company":""},"D13":{"x":72.919,"y":75.44,"company":"CNAP"},"D20":{"x":75.008,"y":71.906,"company":""},"D21":{"x":72.919,"y":71.906,"company":""},"D22":{"x":75.008,"y":70.222,"company":""},"D23":{"x":72.919,"y":70.222,"company":""},"D30":{"x":75.008,"y":67.192,"company":""},"D31":{"x":72.919,"y":65.509,"company":""},"D32":{"x":75.008,"y":65.509,"company":""},"D40":{"x":75.008,"y":60.795,"company":""},"D41":{"x":72.919,"y":60.795,"company":""},"D50":{"x":75.008,"y":55.072,"company":""},"D60":{"x":75.008,"y":49.348,"company":"Sieve"},"D61":{"x":72.919,"y":49.348,"company":""},"D70":{"x":75.008,"y":44.13,"company":"Connectly"},"D71":{"x":72.919,"y":44.13,"company":"Venddor"},"E10":{"x":71.968,"y":77.124,"company":""},"E11":{"x":69.157,"y":77.124,"company":"PicPay"},"E12":{"x":71.968,"y":75.44,"company":""},"E13":{"x":69.157,"y":75.44,"company":""},"E20":{"x":71.968,"y":71.906,"company":""},"E21":{"x":69.157,"y":71.906,"company":"Xlow"},"E22":{"x":71.968,"y":70.222,"company":""},"E23":{"x":69.157,"y":70.222,"company":"Campaign"},"E30":{"x":71.968,"y":65.509,"company":""},"E31":{"x":69.157,"y":67.192,"company":""},"E33":{"x":69.157,"y":65.509,"company":""},"E40":{"x":71.968,"y":60.795,"company":"Signifyd"},"E41":{"x":69.157,"y":60.795,"company":""},"E60":{"x":71.968,"y":49.348,"company":"TotalVoice"},"E70":{"x":71.968,"y":44.13,"company":"Linx"},"E81":{"x":69.157,"y":39.017,"company":""},"E91":{"x":69.157,"y":33.294,"company":""},"F10":{"x":68.206,"y":77.124,"company":""},"F11":{"x":65.947,"y":77.124,"company":""},"F12":{"x":68.206,"y":75.44,"company":""},"F13":{"x":65.947,"y":75.44,"company":""},"F20":{"x":68.206,"y":70.222,"company":"Active Campaing"},"F21":{"x":65.947,"y":71.906,"company":"Active"},"F23":{"x":65.947,"y":70.222,"company":"Active"},"F30":{"x":68.206,"y":67.192,"company":"Pagaleve"},"F31":{"x":65.947,"y":67.193,"company":""},"F32":{"x":68.206,"y":65.509,"company":""},"F33":{"x":65.947,"y":65.509,"company":""},"F40":{"x":68.206,"y":60.795,"company":""},"F41":{"x":65.947,"y":60.795,"company":""},"F50":{"x":68.672,"y":55.277,"company":""},"F60":{"x":68.672,"y":49.554,"company":"iGov"},"F70":{"x":68.672,"y":44.371,"company":"Infracommerce"},"F80":{"x":68.206,"y":39.017,"company":"PayShip"},"F90":{"x":68.206,"y":33.294,"company":"Dito"},"F91":{"x":65.947,"y":33.294,"company":"VTEX"},"G10":{"x":64.996,"y":77.124,"company":"ECBR"},"G12":{"x":64.996,"y":75.44,"company":""},"G20":{"x":64.996,"y":70.222,"company":""},"G21":{"x":62.74,"y":70.222,"company":"Diex"},"G30":{"x":64.996,"y":65.509,"company":""},"G40":{"x":64.996,"y":60.795,"company":""},"G50":{"x":65.462,"y":55.277,"company":""},"G60":{"x":65.462,"y":49.554,"company":""},"G70":{"x":65.462,"y":44.371,"company":"base."},"G90":{"x":64.996,"y":33.294,"company":""},"G91":{"x":62.74,"y":33.295,"company":"KOIN"},"H11":{"x":59.543,"y":77.123,"company":"ECBR"},"H13":{"x":59.543,"y":75.439,"company":"J3 FLEX"},"H20":{"x":61.782,"y":70.222,"company":""},"H21":{"x":59.543,"y":70.221,"company":"Sealed Air"},"H30":{"x":62.251,"y":65.716,"company":""},"H40":{"x":62.251,"y":61.003,"company":""},"H50":{"x":62.251,"y":55.279,"company":""},"H60":{"x":62.251,"y":49.557,"company":""},"H70":{"x":62.251,"y":44.374,"company":"Serasa Experian"},"H80":{"x":62.251,"y":39.225,"company":"J&T Express"},"H90":{"x":61.782,"y":33.295,"company":"ASAAS"},"H91":{"x":59.543,"y":33.293,"company":"CB Full Casas Bahia - CNT Solu\u00e7\u00f5es"},"I10":{"x":58.592,"y":77.123,"company":"SAP"},"I12":{"x":58.592,"y":75.439,"company":"Fullcommerce Brasil"},"I20":{"x":58.592,"y":70.221,"company":""},"I30":{"x":59.058,"y":65.713,"company":""},"I40":{"x":59.058,"y":60.999,"company":""},"I50":{"x":59.058,"y":55.276,"company":""},"I60":{"x":59.058,"y":49.553,"company":""},"I70":{"x":59.058,"y":44.371,"company":"Mercado Pago"},"I80":{"x":59.058,"y":39.222,"company":"Mambo"},"I90":{"x":58.592,"y":33.293,"company":"Magalu"},"J20":{"x":55.574,"y":70.545,"company":""},"J30":{"x":55.574,"y":65.832,"company":""},"J40":{"x":55.574,"y":61.118,"company":""},"J60":{"x":55.574,"y":49.671,"company":"Mercado Livre"},"J70":{"x":55.574,"y":44.489,"company":"Adyen"},"J80":{"x":55.574,"y":39.341,"company":"Shopee"},"K30":{"x":51.177,"y":65.834,"company":""},"K40":{"x":51.177,"y":61.121,"company":""},"K50":{"x":51.177,"y":55.575,"company":""},"K60":{"x":51.177,"y":49.675,"company":"Tray"},"K70":{"x":51.177,"y":44.492,"company":"Bling"},"K80":{"x":51.177,"y":39.343,"company":"Total Express"},"L30":{"x":45.68,"y":65.834,"company":""},"L40":{"x":45.68,"y":61.121,"company":""},"L50":{"x":45.68,"y":55.397,"company":""},"L60":{"x":45.68,"y":49.675,"company":"Nuvemshop"},"L70":{"x":45.68,"y":44.492,"company":"OmniChat"},"L80":{"x":45.68,"y":39.343,"company":"Stone"},"L90":{"x":45.68,"y":33.62,"company":"Sebrae"},"M10":{"x":41.278,"y":75.64,"company":""},"M20":{"x":41.278,"y":70.422,"company":""},"M30":{"x":41.278,"y":65.708,"company":""},"M40":{"x":41.278,"y":60.995,"company":""},"M60":{"x":41.278,"y":49.548,"company":"Octadesk"},"M70":{"x":41.278,"y":44.366,"company":"ChinaLink"},"M80":{"x":41.278,"y":39.217,"company":""},"M90":{"x":41.278,"y":33.494,"company":"Globo Ads"},"N101":{"x":38.851,"y":47.055,"company":"Credseller"},"N103":{"x":38.851,"y":46.05,"company":"Iraha"},"N11":{"x":38.851,"y":77.769,"company":"CAF\u00c9"},"N111":{"x":38.851,"y":43.857,"company":""},"N113":{"x":38.851,"y":42.852,"company":""},"N121":{"x":38.851,"y":40.659,"company":""},"N123":{"x":38.851,"y":39.654,"company":"Predize"},"N13":{"x":38.851,"y":76.765,"company":"va"},"N131":{"x":38.851,"y":37.46,"company":""},"N133":{"x":38.851,"y":36.455,"company":""},"N141":{"x":38.851,"y":34.262,"company":""},"N143":{"x":38.851,"y":33.257,"company":""},"N21":{"x":38.851,"y":74.571,"company":"Mais Plataforma de Afiliados"},"N23":{"x":38.851,"y":73.566,"company":"Cru"},"N31":{"x":38.851,"y":71.372,"company":"Panorama Sistemas"},"N33":{"x":38.851,"y":70.368,"company":""},"N41":{"x":38.851,"y":68.174,"company":"Rakuten"},"N43":{"x":38.851,"y":67.169,"company":""},"N51":{"x":38.851,"y":64.976,"company":""},"N53":{"x":38.851,"y":63.971,"company":""},"N61":{"x":38.851,"y":61.777,"company":"MindLog"},"N63":{"x":38.851,"y":60.773,"company":""},"N71":{"x":38.851,"y":57.39,"company":"PagHiper"},"N73":{"x":38.851,"y":56.386,"company":"Shoppub"},"N81":{"x":38.851,"y":53.957,"company":""},"N83":{"x":38.851,"y":52.952,"company":""},"N91":{"x":38.851,"y":50.59,"company":"E-Billions"},"N93":{"x":38.851,"y":49.586,"company":""},"O10":{"x":38.138,"y":77.769,"company":"CAF\u00c9"},"O100":{"x":38.138,"y":47.055,"company":"Cen"},"O101":{"x":36.473,"y":47.055,"company":"Cen"},"O102":{"x":38.138,"y":46.05,"company":"Vol"},"O103":{"x":36.473,"y":46.05,"company":"Vol"},"O110":{"x":38.138,"y":43.857,"company":""},"O111":{"x":36.473,"y":43.857,"company":"Vol"},"O112":{"x":38.138,"y":42.852,"company":""},"O113":{"x":36.473,"y":42.852,"company":""},"O12":{"x":38.138,"y":76.765,"company":"ABIACOM"},"O120":{"x":38.138,"y":40.659,"company":""},"O121":{"x":36.473,"y":40.659,"company":""},"O122":{"x":38.138,"y":39.654,"company":""},"O123":{"x":36.473,"y":39.654,"company":""},"O13":{"x":36.473,"y":76.765,"company":"Green Peace"},"O130":{"x":38.138,"y":37.46,"company":""},"O131":{"x":36.473,"y":37.46,"company":""},"O132":{"x":38.138,"y":36.455,"company":""},"O133":{"x":36.473,"y":36.455,"company":"SysMiddle"},"O140":{"x":38.138,"y":34.262,"company":""},"O141":{"x":36.473,"y":34.262,"company":""},"O142":{"x":38.138,"y":33.257,"company":""},"O143":{"x":36.473,"y":33.257,"company":""},"O20":{"x":38.138,"y":74.571,"company":"Cru"},"O22":{"x":38.138,"y":73.566,"company":"Tivit"},"O30":{"x":38.138,"y":71.372,"company":""},"O31":{"x":36.473,"y":71.372,"company":"V8 Iluminatal"},"O32":{"x":38.138,"y":70.368,"company":""},"O33":{"x":36.473,"y":70.368,"company":""},"O40":{"x":38.138,"y":68.174,"company":""},"O41":{"x":36.473,"y":68.174,"company":""},"O42":{"x":38.138,"y":67.169,"company":"Auren"},"O43":{"x":36.473,"y":67.169,"company":"Adstart  (L.A.X)"},"O50":{"x":38.138,"y":64.976,"company":""},"O51":{"x":36.473,"y":64.976,"company":""},"O52":{"x":38.138,"y":63.971,"company":""},"O53":{"x":36.473,"y":63.971,"company":""},"O60":{"x":38.138,"y":61.777,"company":""},"O61":{"x":36.473,"y":61.777,"company":""},"O62":{"x":38.138,"y":60.773,"company":""},"O63":{"x":36.473,"y":60.773,"company":""},"O70":{"x":38.138,"y":57.39,"company":""},"O71":{"x":36.473,"y":57.39,"company":"Datafrete"},"O72":{"x":38.138,"y":56.386,"company":""},"O73":{"x":36.473,"y":56.386,"company":""},"O80":{"x":38.138,"y":53.957,"company":""},"O81":{"x":36.473,"y":53.957,"company":""},"O82":{"x":38.138,"y":52.952,"company":""},"O83":{"x":36.473,"y":52.952,"company":""},"O90":{"x":38.138,"y":50.59,"company":""},"O91":{"x":36.473,"y":50.59,"company":"Tec4U"},"O92":{"x":38.138,"y":49.586,"company":"Nemu"},"O93":{"x":36.473,"y":49.586,"company":"tr\u2026"},"P100":{"x":35.76,"y":47.055,"company":"Cen"},"P102":{"x":35.76,"y":46.05,"company":"Volix"},"P110":{"x":35.76,"y":43.857,"company":"STAND DE VENDA ECBR"},"P112":{"x":35.76,"y":42.852,"company":""},"P12":{"x":35.76,"y":76.765,"company":"Liga Digital"},"P120":{"x":35.76,"y":40.659,"company":""},"P122":{"x":35.76,"y":39.654,"company":""},"P130":{"x":35.76,"y":37.46,"company":"Neotrust"},"P132":{"x":35.76,"y":36.455,"company":""},"P140":{"x":35.76,"y":34.262,"company":""},"P142":{"x":35.76,"y":33.257,"company":"Clique Retire (Locker)"},"P30":{"x":35.76,"y":71.372,"company":"MULHERES"},"P3101":{"x":30.162,"y":57.041,"company":"MENTORIA"},"P3103":{"x":30.638,"y":57.041,"company":"MENTORIA"},"P3104":{"x":30.162,"y":56.537,"company":"MENTORIA"},"P3106":{"x":30.638,"y":56.537,"company":"MENTORIA"},"P3107":{"x":30.162,"y":55.021,"company":""},"P3109":{"x":30.638,"y":55.021,"company":""},"P3110":{"x":30.162,"y":54.516,"company":""},"P3112":{"x":30.638,"y":54.516,"company":""},"P3113":{"x":30.162,"y":53.002,"company":""},"P3115":{"x":30.638,"y":53.002,"company":""},"P3116":{"x":30.161,"y":52.668,"company":""},"P3118":{"x":30.638,"y":52.496,"company":""},"P3119":{"x":30.162,"y":50.982,"company":"MUNDO MPE"},"P3121":{"x":30.638,"y":50.982,"company":"MUNDO MPE"},"P3122":{"x":30.162,"y":50.477,"company":"MUNDO MPE"},"P3124":{"x":30.638,"y":50.477,"company":"MUNDO MPE"},"P3125":{"x":30.162,"y":48.961,"company":"MUNDO MPE"},"P3127":{"x":30.638,"y":48.961,"company":"MUNDO MPE"},"P3128":{"x":30.162,"y":48.456,"company":"MUNDO MPE"},"P3130":{"x":30.638,"y":48.456,"company":"MUNDO MPE"},"P3131":{"x":30.162,"y":46.942,"company":""},"P3133":{"x":30.638,"y":46.942,"company":""},"P3134":{"x":30.162,"y":46.436,"company":""},"P3136":{"x":30.638,"y":46.436,"company":""},"P3137":{"x":30.162,"y":44.922,"company":"APEX/SEBRAE"},"P3139":{"x":30.638,"y":44.922,"company":"APEX/SEBRAE"},"P3140":{"x":30.162,"y":44.417,"company":"APEX/SEBRAE"},"P3142":{"x":30.638,"y":44.417,"company":"APEX/SEBRAE"},"P3143":{"x":30.162,"y":42.901,"company":"NEG\u00d3CIOS"},"P3145":{"x":30.638,"y":42.901,"company":"NEG\u00d3CIOS"},"P3146":{"x":30.162,"y":42.396,"company":"RODADA DE"},"P3148":{"x":30.638,"y":42.396,"company":"RODADA DE"},"P32":{"x":35.76,"y":70.368,"company":""},"P40":{"x":35.76,"y":68.174,"company":""},"P40A":{"x":32.423,"y":38.088,"company":""},"P40B":{"x":32.78,"y":38.088,"company":""},"P40C":{"x":32.422,"y":37.246,"company":""},"P40D":{"x":32.782,"y":37.246,"company":""},"P40E":{"x":32.42,"y":36.405,"company":""},"P40F":{"x":32.778,"y":36.405,"company":""},"P40G":{"x":32.425,"y":35.563,"company":""},"P40H":{"x":32.783,"y":35.563,"company":""},"P40I":{"x":32.41,"y":34.722,"company":""},"P40J":{"x":32.767,"y":34.722,"company":""},"P40K":{"x":32.423,"y":33.88,"company":""},"P40L":{"x":32.776,"y":33.88,"company":""},"P40M":{"x":33.6,"y":33.88,"company":""},"P40N":{"x":33.973,"y":33.88,"company":""},"P40O":{"x":33.616,"y":34.722,"company":""},"P40P":{"x":33.97,"y":34.722,"company":""},"P40Q":{"x":33.616,"y":35.563,"company":""},"P40R":{"x":33.971,"y":35.563,"company":""},"P40S":{"x":33.612,"y":36.405,"company":""},"P40T":{"x":33.968,"y":36.405,"company":""},"P40V":{"x":33.614,"y":37.246,"company":""},"P40X":{"x":33.971,"y":37.246,"company":""},"P40Y":{"x":33.612,"y":38.088,"company":""},"P40Z":{"x":33.969,"y":38.088,"company":""},"P42":{"x":35.76,"y":67.169,"company":""},"P50":{"x":35.76,"y":64.976,"company":""},"P52":{"x":35.76,"y":63.971,"company":"Emblue"},"P60":{"x":35.76,"y":61.777,"company":""},"P62":{"x":35.76,"y":60.773,"company":"PISTA DE ALIMENTA\u00c7\u00c3O"},"P70":{"x":35.76,"y":57.39,"company":""},"P72":{"x":35.76,"y":56.386,"company":""},"P80":{"x":35.76,"y":53.957,"company":"harpix"},"P82":{"x":35.76,"y":52.952,"company":""},"P90":{"x":35.76,"y":50.59,"company":""},"P92":{"x":35.76,"y":49.586,"company":"tr\u2026"}};
+const STANDS = {"A31":{"x":82.03,"y":67.192,"company":"Star Live"},"A33":{"x":82.03,"y":65.509,"company":""},"A41":{"x":82.03,"y":62.479,"company":""},"A43":{"x":82.03,"y":60.795,"company":"Serpro"},"A51":{"x":82.03,"y":56.756,"company":""},"A53":{"x":82.03,"y":55.072,"company":"Revi"},"A61":{"x":82.03,"y":51.032,"company":""},"A63":{"x":82.03,"y":49.348,"company":""},"B20":{"x":81.078,"y":71.906,"company":""},"B21":{"x":78.994,"y":71.906,"company":""},"B22":{"x":81.078,"y":70.222,"company":""},"B23":{"x":78.994,"y":70.222,"company":"BonifiQ"},"B30":{"x":81.078,"y":67.192,"company":""},"B31":{"x":78.994,"y":67.192,"company":""},"B32":{"x":81.078,"y":65.509,"company":""},"B33":{"x":78.994,"y":65.509,"company":"Branddi"},"B40":{"x":81.078,"y":62.479,"company":""},"B41":{"x":78.994,"y":62.479,"company":""},"B42":{"x":81.078,"y":60.795,"company":""},"B43":{"x":78.994,"y":60.795,"company":""},"B50":{"x":81.078,"y":56.756,"company":"Widde"},"B51":{"x":78.994,"y":56.756,"company":"Martz"},"B52":{"x":81.078,"y":55.072,"company":""},"B53":{"x":78.994,"y":55.072,"company":""},"B60":{"x":81.078,"y":51.032,"company":""},"B61":{"x":78.994,"y":51.032,"company":""},"B62":{"x":81.078,"y":49.348,"company":""},"B63":{"x":78.994,"y":49.348,"company":""},"B71":{"x":78.994,"y":45.814,"company":"Magis5"},"B73":{"x":78.994,"y":44.13,"company":"IKESAKI"},"C11":{"x":75.947,"y":77.124,"company":"Azul"},"C13":{"x":75.947,"y":75.44,"company":""},"C20":{"x":78.043,"y":71.906,"company":""},"C21":{"x":75.959,"y":71.906,"company":""},"C22":{"x":78.043,"y":70.222,"company":""},"C23":{"x":75.959,"y":70.222,"company":""},"C30":{"x":78.043,"y":67.192,"company":""},"C31":{"x":75.959,"y":67.192,"company":""},"C32":{"x":78.043,"y":65.509,"company":""},"C33":{"x":75.959,"y":65.509,"company":""},"C40":{"x":78.043,"y":60.795,"company":""},"C41":{"x":75.959,"y":62.479,"company":""},"C43":{"x":75.959,"y":60.795,"company":""},"C50":{"x":78.043,"y":56.756,"company":""},"C51":{"x":75.959,"y":55.072,"company":""},"C52":{"x":78.043,"y":55.072,"company":""},"C60":{"x":78.043,"y":49.348,"company":"Vindi"},"C61":{"x":75.959,"y":51.032,"company":"Manda\u00ea"},"C63":{"x":75.959,"y":49.348,"company":""},"C70":{"x":78.043,"y":44.13,"company":"Go Deep"},"C71":{"x":75.959,"y":44.13,"company":"Connectly.ai"},"D10":{"x":74.996,"y":77.124,"company":"Knakasaki"},"D11":{"x":72.919,"y":77.124,"company":"Adjust"},"D12":{"x":74.996,"y":75.44,"company":""},"D13":{"x":72.919,"y":75.44,"company":"CNAP"},"D20":{"x":75.008,"y":71.906,"company":""},"D21":{"x":72.919,"y":71.906,"company":""},"D22":{"x":75.008,"y":70.222,"company":""},"D23":{"x":72.919,"y":70.222,"company":""},"D30":{"x":75.008,"y":67.192,"company":""},"D31":{"x":72.919,"y":65.509,"company":""},"D32":{"x":75.008,"y":65.509,"company":""},"D40":{"x":75.008,"y":60.795,"company":""},"D41":{"x":72.919,"y":60.795,"company":""},"D50":{"x":75.008,"y":55.072,"company":""},"D60":{"x":75.008,"y":49.348,"company":""},"D61":{"x":72.919,"y":49.348,"company":""},"D70":{"x":75.008,"y":44.13,"company":"Connectly"},"D71":{"x":72.919,"y":44.13,"company":"Venddor"},"E10":{"x":71.968,"y":77.124,"company":""},"E11":{"x":69.157,"y":77.124,"company":"PicPay"},"E12":{"x":71.968,"y":75.44,"company":""},"E13":{"x":69.157,"y":75.44,"company":""},"E20":{"x":71.968,"y":71.906,"company":""},"E21":{"x":69.157,"y":71.906,"company":"Xlow"},"E22":{"x":71.968,"y":70.222,"company":""},"E23":{"x":69.157,"y":70.222,"company":"Campaign"},"E30":{"x":71.968,"y":65.509,"company":""},"E31":{"x":69.157,"y":67.192,"company":""},"E33":{"x":69.157,"y":65.509,"company":""},"E40":{"x":71.968,"y":60.795,"company":"Signifyd"},"E41":{"x":69.157,"y":60.795,"company":""},"E60":{"x":71.968,"y":49.348,"company":""},"E70":{"x":71.968,"y":44.13,"company":"Linx"},"E81":{"x":69.157,"y":39.017,"company":""},"E91":{"x":69.157,"y":33.294,"company":""},"F10":{"x":68.206,"y":77.124,"company":""},"F11":{"x":65.947,"y":77.124,"company":""},"F12":{"x":68.206,"y":75.44,"company":""},"F13":{"x":65.947,"y":75.44,"company":""},"F20":{"x":68.206,"y":70.222,"company":"Active Campaing"},"F21":{"x":65.947,"y":71.906,"company":"Active"},"F23":{"x":65.947,"y":70.222,"company":"Active"},"F30":{"x":68.206,"y":67.192,"company":"Pagaleve"},"F31":{"x":65.947,"y":67.193,"company":""},"F32":{"x":68.206,"y":65.509,"company":""},"F33":{"x":65.947,"y":65.509,"company":""},"F40":{"x":68.206,"y":60.795,"company":""},"F41":{"x":65.947,"y":60.795,"company":""},"F50":{"x":68.672,"y":55.277,"company":""},"F60":{"x":68.672,"y":49.554,"company":""},"F70":{"x":68.672,"y":44.371,"company":"Infracommerce"},"F80":{"x":68.206,"y":39.017,"company":""},"F90":{"x":68.206,"y":33.294,"company":"Dito"},"F91":{"x":65.947,"y":33.294,"company":"VTEX"},"G10":{"x":64.996,"y":77.124,"company":"ECBR"},"G12":{"x":64.996,"y":75.44,"company":""},"G20":{"x":64.996,"y":70.222,"company":""},"G21":{"x":62.74,"y":70.222,"company":"Diex"},"G30":{"x":64.996,"y":65.509,"company":""},"G40":{"x":64.996,"y":60.795,"company":""},"G50":{"x":65.462,"y":55.277,"company":""},"G60":{"x":65.462,"y":49.554,"company":""},"G70":{"x":65.462,"y":44.371,"company":"base."},"G90":{"x":64.996,"y":33.294,"company":""},"G91":{"x":62.74,"y":33.295,"company":"KOIN"},"H11":{"x":59.543,"y":77.123,"company":"ECBR"},"H13":{"x":59.543,"y":75.439,"company":"J3 FLEX"},"H20":{"x":61.782,"y":70.222,"company":""},"H21":{"x":59.543,"y":70.221,"company":"Sealed Air"},"H30":{"x":62.251,"y":65.716,"company":""},"H40":{"x":62.251,"y":61.003,"company":""},"H50":{"x":62.251,"y":55.279,"company":""},"H60":{"x":62.251,"y":49.557,"company":""},"H70":{"x":62.251,"y":44.374,"company":"Serasa Experian"},"H80":{"x":62.251,"y":39.225,"company":"J&T Express"},"H90":{"x":61.782,"y":33.295,"company":"ASAAS"},"H91":{"x":59.543,"y":33.293,"company":"CB Full Casas Bahia - CNT Solu\u00e7\u00f5es"},"I10":{"x":58.592,"y":77.123,"company":"SAP"},"I12":{"x":58.592,"y":75.439,"company":"Fullcommerce Brasil"},"I20":{"x":58.592,"y":70.221,"company":""},"I30":{"x":59.058,"y":65.713,"company":""},"I40":{"x":59.058,"y":60.999,"company":""},"I50":{"x":59.058,"y":55.276,"company":""},"I60":{"x":59.058,"y":49.553,"company":""},"I70":{"x":59.058,"y":44.371,"company":"Mercado Pago"},"I80":{"x":59.058,"y":39.222,"company":"Mambo"},"I90":{"x":58.592,"y":33.293,"company":"Magalu"},"J20":{"x":55.574,"y":70.545,"company":""},"J30":{"x":55.574,"y":65.832,"company":""},"J40":{"x":55.574,"y":61.118,"company":""},"J60":{"x":55.574,"y":49.671,"company":"Mercado Livre"},"J70":{"x":55.574,"y":44.489,"company":"Adyen"},"J80":{"x":55.574,"y":39.341,"company":"Shopee"},"K30":{"x":51.177,"y":65.834,"company":""},"K40":{"x":51.177,"y":61.121,"company":""},"K50":{"x":51.177,"y":55.575,"company":""},"K60":{"x":51.177,"y":49.675,"company":"Tray"},"K70":{"x":51.177,"y":44.492,"company":"Bling"},"K80":{"x":51.177,"y":39.343,"company":"Total Express"},"L30":{"x":45.68,"y":65.834,"company":""},"L40":{"x":45.68,"y":61.121,"company":""},"L50":{"x":45.68,"y":55.397,"company":""},"L60":{"x":45.68,"y":49.675,"company":"Nuvemshop"},"L70":{"x":45.68,"y":44.492,"company":"OmniChat"},"L80":{"x":45.68,"y":39.343,"company":"Stone"},"L90":{"x":45.68,"y":33.62,"company":"TENDENCY BRASIL"},"M10":{"x":41.278,"y":75.64,"company":""},"M20":{"x":41.278,"y":70.422,"company":""},"M30":{"x":41.278,"y":65.708,"company":""},"M40":{"x":41.278,"y":60.995,"company":""},"M60":{"x":41.278,"y":49.548,"company":"Octadesk"},"M70":{"x":41.278,"y":44.366,"company":"ChinaLink"},"M80":{"x":41.278,"y":39.217,"company":""},"M90":{"x":41.278,"y":33.494,"company":"Globo Ads"},"N101":{"x":38.851,"y":47.055,"company":"Credseller"},"N103":{"x":38.851,"y":46.05,"company":"Iraha"},"N11":{"x":38.851,"y":77.769,"company":"CAF\u00c9"},"N111":{"x":38.851,"y":43.857,"company":"Alternativa Sistemas"},"N113":{"x":38.851,"y":42.852,"company":""},"N121":{"x":38.851,"y":40.659,"company":""},"N123":{"x":38.851,"y":39.654,"company":"Predize"},"N13":{"x":38.851,"y":76.765,"company":"Mixpanel"},"N131":{"x":38.851,"y":37.46,"company":""},"N133":{"x":38.851,"y":36.455,"company":""},"N141":{"x":38.851,"y":34.262,"company":""},"N143":{"x":38.851,"y":33.257,"company":""},"N21":{"x":38.851,"y":74.571,"company":"Mais Plataforma de Afiliados"},"N23":{"x":38.851,"y":73.566,"company":"Cru"},"N31":{"x":38.851,"y":71.372,"company":"Panorama Sistemas"},"N33":{"x":38.851,"y":70.368,"company":""},"N41":{"x":38.851,"y":68.174,"company":"Rakuten"},"N43":{"x":38.851,"y":67.169,"company":""},"N51":{"x":38.851,"y":64.976,"company":""},"N53":{"x":38.851,"y":63.971,"company":""},"N61":{"x":38.851,"y":61.777,"company":"MindLog"},"N63":{"x":38.851,"y":60.773,"company":"Ag\u00eancia FRN cubo"},"N71":{"x":38.851,"y":57.39,"company":"PagHiper"},"N73":{"x":38.851,"y":56.386,"company":"Shoppub"},"N81":{"x":38.851,"y":53.957,"company":"Brasct"},"N83":{"x":38.851,"y":52.952,"company":""},"N91":{"x":38.851,"y":50.59,"company":"E-Billions"},"N93":{"x":38.851,"y":49.586,"company":"Nakarod"},"O10":{"x":38.138,"y":77.769,"company":"CAF\u00c9"},"O100":{"x":38.138,"y":47.055,"company":"Cen"},"O101":{"x":36.473,"y":47.055,"company":"Cen"},"O102":{"x":38.138,"y":46.05,"company":"Vol"},"O103":{"x":36.473,"y":46.05,"company":"PAG \u00datil (Banco \u00datil)"},"O110":{"x":38.138,"y":43.857,"company":""},"O111":{"x":36.473,"y":43.857,"company":"Vol"},"O112":{"x":38.138,"y":42.852,"company":"Barbieratto"},"O113":{"x":36.473,"y":42.852,"company":""},"O12":{"x":38.138,"y":76.765,"company":"ABIACOM"},"O120":{"x":38.138,"y":40.659,"company":"Moengage"},"O121":{"x":36.473,"y":40.659,"company":""},"O122":{"x":38.138,"y":39.654,"company":""},"O123":{"x":36.473,"y":39.654,"company":""},"O13":{"x":36.473,"y":76.765,"company":"Green Peace"},"O130":{"x":38.138,"y":37.46,"company":""},"O131":{"x":36.473,"y":37.46,"company":""},"O132":{"x":38.138,"y":36.455,"company":""},"O133":{"x":36.473,"y":36.455,"company":"SysMiddle"},"O140":{"x":38.138,"y":34.262,"company":""},"O141":{"x":36.473,"y":34.262,"company":""},"O142":{"x":38.138,"y":33.257,"company":""},"O143":{"x":36.473,"y":33.257,"company":""},"O20":{"x":38.138,"y":74.571,"company":"Cru"},"O22":{"x":38.138,"y":73.566,"company":"Tivit"},"O30":{"x":38.138,"y":71.372,"company":""},"O31":{"x":36.473,"y":71.372,"company":"V8 Iluminatal"},"O32":{"x":38.138,"y":70.368,"company":""},"O33":{"x":36.473,"y":70.368,"company":""},"O40":{"x":38.138,"y":68.174,"company":"Actionpay Brasil"},"O41":{"x":36.473,"y":68.174,"company":""},"O42":{"x":38.138,"y":67.169,"company":"Auren"},"O43":{"x":36.473,"y":67.169,"company":"Adstart  (L.A.X)"},"O50":{"x":38.138,"y":64.976,"company":"AIM"},"O51":{"x":36.473,"y":64.976,"company":"Almah"},"O52":{"x":38.138,"y":63.971,"company":""},"O53":{"x":36.473,"y":63.971,"company":""},"O60":{"x":38.138,"y":61.777,"company":"Buzzmonitor"},"O61":{"x":36.473,"y":61.777,"company":""},"O62":{"x":38.138,"y":60.773,"company":""},"O63":{"x":36.473,"y":60.773,"company":""},"O70":{"x":38.138,"y":57.39,"company":""},"O71":{"x":36.473,"y":57.39,"company":"Datafrete"},"O72":{"x":38.138,"y":56.386,"company":""},"O73":{"x":36.473,"y":56.386,"company":""},"O80":{"x":38.138,"y":53.957,"company":""},"O81":{"x":36.473,"y":53.957,"company":""},"O82":{"x":38.138,"y":52.952,"company":""},"O83":{"x":36.473,"y":52.952,"company":""},"O90":{"x":38.138,"y":50.59,"company":""},"O91":{"x":36.473,"y":50.59,"company":"Tec4U"},"O92":{"x":38.138,"y":49.586,"company":"Nemu"},"O93":{"x":36.473,"y":49.586,"company":"tr\u2026"},"P100":{"x":35.76,"y":47.055,"company":"Cen"},"P102":{"x":35.76,"y":46.05,"company":"Volix"},"P110":{"x":35.76,"y":43.857,"company":"Vol"},"P112":{"x":35.76,"y":42.852,"company":""},"P12":{"x":35.76,"y":76.765,"company":"Liga Digital"},"P120":{"x":35.76,"y":40.659,"company":""},"P122":{"x":35.76,"y":39.654,"company":""},"P130":{"x":35.76,"y":37.46,"company":"Neotrust"},"P132":{"x":35.76,"y":36.455,"company":""},"P140":{"x":35.76,"y":34.262,"company":""},"P142":{"x":35.76,"y":33.257,"company":"Clique Retire (Locker)"},"P30":{"x":35.76,"y":71.372,"company":"MULHERES"},"P3101":{"x":30.162,"y":57.041,"company":"Multiagents"},"P3103":{"x":30.638,"y":57.041,"company":"Iset"},"P3104":{"x":30.162,"y":56.537,"company":"Appsflyer"},"P3106":{"x":30.638,"y":56.537,"company":"Seller House (Potencializou)"},"P3107":{"x":30.162,"y":55.021,"company":"Apiki"},"P3109":{"x":30.638,"y":55.021,"company":"Wolf Gest\u00e3o"},"P3110":{"x":30.162,"y":54.516,"company":"Quest Energia"},"P3112":{"x":30.638,"y":54.516,"company":"Hunter Hub"},"P3113":{"x":30.162,"y":53.002,"company":"Mercos"},"P3115":{"x":30.638,"y":53.002,"company":"Giroflex"},"P3116":{"x":30.161,"y":52.668,"company":"D2C"},"P3118":{"x":30.638,"y":52.496,"company":"Mahara Marketing"},"P3119":{"x":30.162,"y":50.982,"company":"Venda. AI"},"P3121":{"x":30.638,"y":50.982,"company":"Pontal Tech"},"P3122":{"x":30.162,"y":50.477,"company":"Naia"},"P3124":{"x":30.638,"y":50.477,"company":"Lucratech"},"P3125":{"x":30.162,"y":48.961,"company":"SELLER PRO"},"P3127":{"x":30.638,"y":48.961,"company":"E-Commerce Objetivo"},"P3128":{"x":30.162,"y":48.456,"company":"AZAZUU"},"P3130":{"x":30.638,"y":48.456,"company":"Gestor Seller (MKTP)"},"P3131":{"x":30.162,"y":46.942,"company":"Rojemac"},"P3133":{"x":30.638,"y":46.942,"company":"IDW Solucoes (Idworks)"},"P3134":{"x":30.162,"y":46.436,"company":"JOLECT / CHATPLUSAI"},"P3136":{"x":30.638,"y":46.436,"company":"Frete Barato"},"P3137":{"x":30.162,"y":44.922,"company":"Cargoblue"},"P3139":{"x":30.638,"y":44.922,"company":"Sexto Grau"},"P3140":{"x":30.162,"y":44.417,"company":"Fsense (Callink)"},"P3142":{"x":30.638,"y":44.417,"company":"Converta"},"P3143":{"x":30.162,"y":42.901,"company":"ManyConvert"},"P3145":{"x":30.638,"y":42.901,"company":"Indexa AI"},"P3146":{"x":30.162,"y":42.396,"company":"Bee Delivery"},"P3148":{"x":30.638,"y":42.396,"company":"Abbiamo"},"P32":{"x":35.76,"y":70.368,"company":""},"P40":{"x":35.76,"y":68.174,"company":""},"P40A":{"x":32.423,"y":38.088,"company":"Nordware"},"P40B":{"x":32.78,"y":38.088,"company":"Neomode"},"P40C":{"x":32.422,"y":37.246,"company":"GatekeeperX"},"P40D":{"x":32.782,"y":37.246,"company":"More Than Real"},"P40E":{"x":32.42,"y":36.405,"company":"Growth Sales"},"P40F":{"x":32.778,"y":36.405,"company":"Infinity6"},"P40G":{"x":32.425,"y":35.563,"company":"Segunda Venda"},"P40H":{"x":32.783,"y":35.563,"company":"SEO Genome"},"P40I":{"x":32.41,"y":34.722,"company":"Snapfy"},"P40J":{"x":32.767,"y":34.722,"company":"Prismaly"},"P40K":{"x":32.423,"y":33.88,"company":"Fidelizar+"},"P40L":{"x":32.776,"y":33.88,"company":"SpringScale (BR55 Midia)"},"P40M":{"x":33.6,"y":33.88,"company":"Yoodash (yooper)"},"P40N":{"x":33.973,"y":33.88,"company":"e-Ship"},"P40O":{"x":33.616,"y":34.722,"company":"Be Intelligence"},"P40P":{"x":33.97,"y":34.722,"company":"Codebit"},"P40Q":{"x":33.616,"y":35.563,"company":"Vitom"},"P40R":{"x":33.971,"y":35.563,"company":"Grupo Toys (Uni\u00e3o Toys)"},"P40S":{"x":33.612,"y":36.405,"company":"NovaMind"},"P40T":{"x":33.968,"y":36.405,"company":"Futuriza"},"P40V":{"x":33.614,"y":37.246,"company":"TheITIN"},"P40X":{"x":33.971,"y":37.246,"company":"naPorta"},"P40Y":{"x":33.612,"y":38.088,"company":"Full Flex Transportes"},"P40Z":{"x":33.969,"y":38.088,"company":"Lagom Tech"},"P42":{"x":35.76,"y":67.169,"company":""},"P50":{"x":35.76,"y":64.976,"company":""},"P52":{"x":35.76,"y":63.971,"company":"Emblue"},"P60":{"x":35.76,"y":61.777,"company":""},"P62":{"x":35.76,"y":60.773,"company":"Ag\u00eancia e-Plus"},"P70":{"x":35.76,"y":57.39,"company":""},"P72":{"x":35.76,"y":56.386,"company":""},"P80":{"x":35.76,"y":53.957,"company":"harpix"},"P82":{"x":35.76,"y":52.952,"company":""},"P90":{"x":35.76,"y":50.59,"company":"BR Comerce"},"P92":{"x":35.76,"y":49.586,"company":"tr\u2026"}};
 const SPECIAL = [{"id":"WC_TOP_LEFT","name":"Banheiro","alias":["WC","banheiro","sanit\u00e1rio"],"x":29.7,"y":12.9},{"id":"WC_TOP_RIGHT","name":"Banheiro","alias":["WC","banheiro","sanit\u00e1rio"],"x":73.0,"y":12.9},{"id":"WC_LEFT","name":"Banheiro","alias":["WC","banheiro","sanit\u00e1rio"],"x":12.0,"y":47.0},{"id":"ALIMENTACAO_1","name":"Alimenta\u00e7\u00e3o","alias":["alimenta\u00e7\u00e3o","comida","restaurante"],"x":19.8,"y":23.5},{"id":"ALIMENTACAO_2","name":"Alimenta\u00e7\u00e3o","alias":["alimenta\u00e7\u00e3o","comida","restaurante"],"x":19.8,"y":39.7},{"id":"ALIMENTACAO_3","name":"Alimenta\u00e7\u00e3o (Dir.)","alias":["alimenta\u00e7\u00e3o","comida","restaurante"],"x":86.1,"y":53.6},{"id":"ALIMENTACAO_4","name":"Alimenta\u00e7\u00e3o","alias":["alimenta\u00e7\u00e3o","comida","restaurante"],"x":19.8,"y":56.2},{"id":"ALIMENTACAO_5","name":"Alimenta\u00e7\u00e3o","alias":["alimenta\u00e7\u00e3o","comida","restaurante"],"x":19.8,"y":67.8},{"id":"ALIMENTACAO_6","name":"Alimenta\u00e7\u00e3o (Baixo)","alias":["alimenta\u00e7\u00e3o","comida","restaurante"],"x":50.0,"y":82.7},{"id":"PISTA_ALIMENTACAO","name":"Pista de Alimenta\u00e7\u00e3o","alias":["alimenta\u00e7\u00e3o","pista","comida"],"x":33.2,"y":60.1},{"id":"PLENARIA_MKTV","name":"Plen\u00e1ria Marketing e Vendas","alias":["plen\u00e1ria","marketing","vendas"],"x":79.9,"y":29.6},{"id":"PLENARIA_MARKETPLACE","name":"Plen\u00e1ria Marketplace e Canais","alias":["plen\u00e1ria","marketplace","canais","venda"],"x":47.4,"y":23.5},{"id":"PLENARIA_INOVACAO","name":"Plen\u00e1ria Inova\u00e7\u00e3o e Tecnologia","alias":["plen\u00e1ria","inova\u00e7\u00e3o","tecnologia"],"x":33.3,"y":23.3},{"id":"PLENARIA_GESTAO","name":"Plen\u00e1ria Gest\u00e3o e Opera\u00e7\u00f5es","alias":["plen\u00e1ria","gest\u00e3o","opera\u00e7\u00f5es"],"x":61.7,"y":23.5},{"id":"PLENARIA_PULSAR","name":"Plen\u00e1ria Pulsar","alias":["plen\u00e1ria","pulsar"],"x":29.2,"y":71.5},{"id":"AUDITORIO","name":"Audit\u00f3rio","alias":["audit\u00f3rio"],"x":28.1,"y":49.8},{"id":"MENTORIA","name":"Mentoria","alias":["mentoria"],"x":28.0,"y":56.6},{"id":"MUNDO_MPE","name":"Mundo MPE","alias":["mpe","mundo mpe","sebrae"],"x":29.4,"y":50.0},{"id":"ARENA_ECBR_1","name":"Arena ECBR 1","alias":["arena","ecbr"],"x":28.9,"y":37.7},{"id":"ARENA_ECBR_2","name":"Arena ECBR 2","alias":["arena","ecbr"],"x":28.9,"y":34.8},{"id":"ESTUDIO_PODCAST","name":"Est\u00fadio Podcast","alias":["est\u00fadio","podcast","live commerce"],"x":50.8,"y":34.7},{"id":"ESTUDIO_BORA_VAREJO","name":"Est\u00fadio Podcast Bora Varejo","alias":["bora varejo","est\u00fadio","podcast"],"x":51.5,"y":36.0},{"id":"IMPRENSA","name":"Imprensa","alias":["imprensa"],"x":54.7,"y":34.8},{"id":"ESTANDE_VENDAS","name":"Estande de Vendas","alias":["estande","vendas"],"x":56.3,"y":34.8},{"id":"LOUNGE_PREMIUM","name":"Lounge Premium ECBR","alias":["lounge","premium","ecbr"],"x":77.3,"y":13.3},{"id":"LOUNGE_APEXBRASIL","name":"Lounge ApexBrasil","alias":["apex","apexbrasil","lounge","coworking"],"x":53.8,"y":24.0},{"id":"LOUNGE_CAFE_WEI","name":"Lounge Coworking Caf\u00e9 Wei","alias":["wei","caf\u00e9","lounge","coworking"],"x":39.4,"y":24.0},{"id":"LOUNGE_GETBOTS","name":"Lounge GetBots","alias":["getbots","lounge"],"x":68.1,"y":26.7},{"id":"CAMAROTE","name":"Camarote","alias":["camarote","vip"],"x":78.9,"y":18.2},{"id":"RODADA_NEGOCIOS","name":"Rodada de Neg\u00f3cios Apex/Sebrae","alias":["rodada","neg\u00f3cios","apex","sebrae"],"x":28.1,"y":43.2},{"id":"RODADA_NEGOCIOS_2","name":"Rodada de Neg\u00f3cios ECBR","alias":["rodada","neg\u00f3cios","ecbr"],"x":29.3,"y":62.3},{"id":"LOCKERS","name":"Lockers","alias":["lockers","arm\u00e1rio"],"x":19.1,"y":76.4},{"id":"CONCIERGE","name":"Concierge","alias":["concierge","atendimento"],"x":55.6,"y":77.0},{"id":"PALCO_SOLUCOES","name":"Palco Solu\u00e7\u00f5es","alias":["palco","solu\u00e7\u00f5es"],"x":80.0,"y":76.8},{"id":"WORKSHOP_ECBR","name":"Workshop ECBR","alias":["workshop","ecbr"],"x":62.3,"y":76.7},{"id":"ENTRADA_1","name":"Entrada","alias":["entrada"],"x":34.7,"y":29.1},{"id":"ENTRADA_2","name":"Entrada","alias":["entrada"],"x":48.6,"y":29.1},{"id":"ENTRADA_3","name":"Entrada","alias":["entrada"],"x":60.8,"y":29.1},{"id":"ENTRADA_4","name":"Entrada","alias":["entrada"],"x":73.1,"y":30.6},{"id":"ENTRADA_PRINCIPAL","name":"Entrada Principal","alias":["entrada","acesso"],"x":48.4,"y":73.8},{"id":"ENTRADA_VIP","name":"Entrada VIP / Palestrantes","alias":["entrada","vip","palestrantes"],"x":79.9,"y":82.0},{"id":"SAIDA","name":"Sa\u00edda","alias":["sa\u00edda","saida"],"x":62.9,"y":83.8},{"id":"SAIDA_EMERGENCIA","name":"Sa\u00edda de Emerg\u00eancia","alias":["sa\u00edda","emerg\u00eancia"],"x":86.1,"y":48.4},{"id":"CREDENCIAMENTO","name":"Credenciamento / Atendimento","alias":["credenciamento","atendimento","acesso"],"x":50.7,"y":85.9},{"id":"CAFE_SANTA_MONICA","name":"Caf\u00e9 Santa M\u00f4nica","alias":["caf\u00e9","santa monica","caf\u00e9 santa m\u00f4nica"],"x":36.1,"y":77.8},{"id":"MULHERES_ECOMMERCE","name":"Mulheres no E-Commerce","alias":["mulheres","e-commerce","mulheres no e-commerce"],"x":36.1,"y":74.1},{"id":"CAEX_TOP","name":"CAEX","alias":["caex"],"x":52.1,"y":13.2},{"id":"CAEX_BOTTOM","name":"CAEX","alias":["caex"],"x":32.6,"y":82.4},{"id":"PRACA_1","name":"Pra\u00e7a","alias":["pra\u00e7a"],"x":65.5,"y":40.5},{"id":"PRACA_2","name":"Pra\u00e7a","alias":["pra\u00e7a"],"x":81.9,"y":71.7},{"id":"CAMPAIGN_ACTIVE","name":"Campaign Active","alias":["campaign active","campaign"],"x":68.2,"y":71.7}];
 
-// Street x-positions (% of map width)
 const VX = [12.0, 20.0, 28.5, 31.696, 37.202, 39.692, 42.974, 48.341, 53.465, 57.465, 60.56, 63.769, 66.978, 70.464, 73.864, 76.903, 79.936, 82.974, 87.0];
-
-// Horizontal corridor y-positions (% of map height)
 const HY = [13.0, 18.5, 23.5, 29.0, 32.0, 37.3, 43.25, 48.05, 53.25, 59.1, 64.0, 69.2, 74.5, 79.0, 83.0, 87.0];
 
 // ======================================================
-// WAYPOINT GRAPH
+// WAYPOINT GRAPH  (A*)
 // ======================================================
-// Each waypoint: {x, y} at (VX[i], HY[j]) intersection
-// Index: i * HY.length + j
 const NV = VX.length, NH = HY.length;
 const NW = NV * NH;
 
 function wpIdx(vi, hi) { return vi * NH + hi; }
 function wpPos(idx) { return {x: VX[Math.floor(idx/NH)], y: HY[idx % NH]}; }
 
-// Build adjacency list
 const ADJ = Array.from({length: NW}, () => []);
 for (let vi = 0; vi < NV; vi++) {
   for (let hi = 0; hi < NH; hi++) {
     const idx = wpIdx(vi, hi);
-    // Horizontal neighbors (same corridor, adjacent VX)
     if (vi > 0) {
       const ni = wpIdx(vi-1, hi);
       const d = Math.abs(VX[vi] - VX[vi-1]);
-      ADJ[idx].push([ni, d]);
-      ADJ[ni].push([idx, d]);
+      ADJ[idx].push([ni, d]); ADJ[ni].push([idx, d]);
     }
-    // Vertical neighbors (same street, adjacent HY)
     if (hi > 0) {
       const ni = wpIdx(vi, hi-1);
       const d = Math.abs(HY[hi] - HY[hi-1]);
-      ADJ[idx].push([ni, d]);
-      ADJ[ni].push([idx, d]);
+      ADJ[idx].push([ni, d]); ADJ[ni].push([idx, d]);
     }
   }
 }
@@ -229,7 +227,6 @@ function nearestHY(y) {
   return best;
 }
 
-// A* pathfinding
 function aStar(startIdx, endIdx) {
   if (startIdx === endIdx) return [startIdx];
   const g = new Float32Array(NW).fill(Infinity);
@@ -237,11 +234,8 @@ function aStar(startIdx, endIdx) {
   const open = new Set([startIdx]);
   g[startIdx] = 0;
   const ep = wpPos(endIdx);
-  const h = (i) => {
-    const p = wpPos(i);
-    return Math.abs(p.x - ep.x) + Math.abs(p.y - ep.y);
-  };
-  const f = (i) => g[i] + h(i);
+  const h = i => { const p = wpPos(i); return Math.abs(p.x-ep.x)+Math.abs(p.y-ep.y); };
+  const f = i => g[i] + h(i);
   while (open.size) {
     let cur = -1, cf = Infinity;
     for (const i of open) { const fi = f(i); if (fi < cf) { cf = fi; cur = i; } }
@@ -258,67 +252,39 @@ function aStar(startIdx, endIdx) {
   return path.reverse();
 }
 
-// Build route points (% coordinates)
 function buildRoutePts(ax, ay, bx, by) {
   const viA = nearestVX(ax), hiA = nearestHY(ay);
   const viB = nearestVX(bx), hiB = nearestHY(by);
   const wpA = wpIdx(viA, hiA), wpB = wpIdx(viB, hiB);
-
   const path = aStar(wpA, wpB);
   if (!path.length && wpA !== wpB) return null;
-
   const pts = [];
-  // Exit A: go vertical to its HY corridor, then horizontal to its VX street
-  pts.push({x: ax, y: ay});
-  pts.push({x: ax, y: HY[hiA]});
-  pts.push({x: VX[viA], y: HY[hiA]});
-
-  // Intermediate waypoints (skip first and last, already added above)
-  for (let i = 1; i < path.length - 1; i++) {
-    const p = wpPos(path[i]);
-    pts.push({x: p.x, y: p.y});
-  }
-
-  // Arrive at B: go horizontal to B's x along its HY, then vertical to B
-  if (wpA !== wpB) {
-    const lastWp = wpPos(path[path.length - 1]);
-    pts.push({x: lastWp.x, y: lastWp.y});
-  }
-  pts.push({x: bx, y: HY[hiB]});
-  pts.push({x: bx, y: by});
-
-  // Deduplicate consecutive identical points
-  return pts.filter((p, i) => i === 0 || Math.abs(p.x - pts[i-1].x) > 0.01 || Math.abs(p.y - pts[i-1].y) > 0.01);
+  pts.push({x:ax, y:ay});
+  pts.push({x:ax, y:HY[hiA]});
+  pts.push({x:VX[viA], y:HY[hiA]});
+  for (let i = 1; i < path.length - 1; i++) { const p = wpPos(path[i]); pts.push({x:p.x,y:p.y}); }
+  if (wpA !== wpB) { const lp = wpPos(path[path.length-1]); pts.push({x:lp.x,y:lp.y}); }
+  pts.push({x:bx, y:HY[hiB]});
+  pts.push({x:bx, y:by});
+  return pts.filter((p,i) => i===0 || Math.abs(p.x-pts[i-1].x)>0.01 || Math.abs(p.y-pts[i-1].y)>0.01);
 }
 
 // ======================================================
 // SEARCH INDEX
 // ======================================================
 const ITEMS = [];
-
-// Add stands
 for (const [code, s] of Object.entries(STANDS)) {
   const terms = [code.toLowerCase()];
   let label = code;
-  if (s.company) {
-    terms.push(s.company.toLowerCase());
-    label = s.company;
-  }
-  ITEMS.push({type:'stand', code, label, company: s.company, x: s.x, y: s.y, terms});
+  if (s.company) { terms.push(s.company.toLowerCase()); label = s.company; }
+  ITEMS.push({type:'stand', code, label, company:s.company, x:s.x, y:s.y, terms});
 }
-
-// Add special areas
 for (const sp of SPECIAL) {
   const terms = [sp.name.toLowerCase(), sp.id.toLowerCase()];
   if (sp.alias) sp.alias.forEach(a => terms.push(a.toLowerCase()));
-  ITEMS.push({type:'special', code: sp.id, label: sp.name, x: sp.x, y: sp.y, terms});
+  ITEMS.push({type:'special', code:sp.id, label:sp.name, x:sp.x, y:sp.y, terms});
 }
-
-// Sort: stands first, then specials
-ITEMS.sort((a, b) => {
-  if (a.type !== b.type) return a.type === 'stand' ? -1 : 1;
-  return a.code.localeCompare(b.code);
-});
+ITEMS.sort((a,b) => a.type!==b.type ? (a.type==='stand'?-1:1) : a.code.localeCompare(b.code));
 
 function searchItems(q) {
   if (!q || q.length < 1) return [];
@@ -328,12 +294,12 @@ function searchItems(q) {
     let score = 0;
     for (const term of item.terms) {
       if (term === ql) { score = 100; break; }
-      if (term.startsWith(ql)) { score = Math.max(score, 80 - term.length); }
-      else if (term.includes(ql)) { score = Math.max(score, 40); }
+      if (term.startsWith(ql)) score = Math.max(score, 80 - term.length);
+      else if (term.includes(ql)) score = Math.max(score, 40);
     }
     if (score > 0) results.push({item, score});
   }
-  results.sort((a, b) => b.score - a.score);
+  results.sort((a,b) => b.score - a.score);
   return results.slice(0, 25).map(r => r.item);
 }
 
@@ -347,9 +313,12 @@ const mapImg = document.getElementById('map-img');
 const cv = document.getElementById('cv');
 const mkDiv = document.getElementById('mk');
 const ctx = cv.getContext('2d');
+const panel = document.getElementById('panel');
 
 let MAP_W = 0, MAP_H = 0;
 let zoom = 1, panX = 0, panY = 0;
+
+function getPanelH() { return panel.getBoundingClientRect().bottom || panel.offsetHeight; }
 
 function onMapLoad() {
   MAP_W = mapImg.naturalWidth;
@@ -362,17 +331,17 @@ function onMapLoad() {
 }
 
 function applyTransform(animated) {
-  if (animated) ms.style.transition = 'transform .5s cubic-bezier(.25,.8,.25,1)';
-  else ms.style.transition = '';
+  ms.style.transition = animated ? 'transform .45s cubic-bezier(.25,.8,.25,1)' : '';
   ms.style.transform = `translate(${panX.toFixed(1)}px,${panY.toFixed(1)}px) scale(${zoom})`;
 }
 
 function resetView() {
   const vw = vp.offsetWidth, vh = vp.offsetHeight;
-  const fitZ = Math.min(vw / MAP_W, vh / MAP_H) * 0.98;
+  const ph = getPanelH();
+  const fitZ = Math.min(vw / MAP_W, (vh - ph) / MAP_H) * 0.96;
   zoom = fitZ;
   panX = (vw - MAP_W * zoom) / 2;
-  panY = (vh - MAP_H * zoom) / 2;
+  panY = ph + ((vh - ph) - MAP_H * zoom) / 2;
   applyTransform(true);
 }
 
@@ -393,109 +362,72 @@ function autoZoomToRoute(pts) {
   const ys = pts.map(p => p.y / 100 * MAP_H);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
-  const pad = 80;
+  const pad = 100;
   const routeW = maxX - minX + pad * 2;
   const routeH = maxY - minY + pad * 2;
-  const vw = vp.offsetWidth, vh = vp.offsetHeight - 100;
-  zoom = Math.min(vw / routeW, vh / routeH, 6);
-  zoom = Math.max(zoom, 0.5);
-  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const vw = vp.offsetWidth;
+  const ph = getPanelH();
+  const availH = vp.offsetHeight - ph;
+  zoom = Math.min(vw / routeW, availH / routeH, 5);
+  zoom = Math.max(zoom, 0.4);
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
   panX = vw / 2 - cx * zoom;
-  panY = (vh / 2 + 50) - cy * zoom;
+  panY = ph + availH / 2 - cy * zoom;
   applyTransform(true);
 }
 
-// Convert % to canvas pixels
 function px(xPct) { return xPct / 100 * MAP_W; }
 function py(yPct) { return yPct / 100 * MAP_H; }
 
-// Draw route
-let animFrame = null;
-let dashOffset = 0;
+let animFrame = null, dashOffset = 0;
 
 function drawRoute(pts) {
   if (animFrame) cancelAnimationFrame(animFrame);
   ctx.clearRect(0, 0, MAP_W, MAP_H);
   if (!pts || !pts.length) return;
-
-  // Shadow
-  ctx.save();
-  ctx.shadowColor = 'rgba(231,76,60,0.3)';
-  ctx.shadowBlur = 16;
-  ctx.beginPath();
-  pts.forEach((p, i) => i === 0 ? ctx.moveTo(px(p.x), py(p.y)) : ctx.lineTo(px(p.x), py(p.y)));
-  ctx.strokeStyle = 'rgba(231,76,60,0.2)';
-  ctx.lineWidth = 12;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.setLineDash([]);
-  ctx.stroke();
-  ctx.restore();
-
-  // Animated dashed line
   function animate() {
     ctx.clearRect(0, 0, MAP_W, MAP_H);
-    // Background glow
+    // Glow
     ctx.save();
     ctx.beginPath();
-    pts.forEach((p, i) => i === 0 ? ctx.moveTo(px(p.x), py(p.y)) : ctx.lineTo(px(p.x), py(p.y)));
-    ctx.strokeStyle = 'rgba(231,76,60,0.15)';
-    ctx.lineWidth = 14;
-    ctx.setLineDash([]);
-    ctx.stroke();
+    pts.forEach((p,i) => i===0 ? ctx.moveTo(px(p.x),py(p.y)) : ctx.lineTo(px(p.x),py(p.y)));
+    ctx.strokeStyle = 'rgba(231,76,60,0.15)'; ctx.lineWidth = 18; ctx.setLineDash([]); ctx.stroke();
     ctx.restore();
-
     // White outline
     ctx.save();
     ctx.beginPath();
-    pts.forEach((p, i) => i === 0 ? ctx.moveTo(px(p.x), py(p.y)) : ctx.lineTo(px(p.x), py(p.y)));
-    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-    ctx.lineWidth = 7;
-    ctx.setLineDash([]);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke();
+    pts.forEach((p,i) => i===0 ? ctx.moveTo(px(p.x),py(p.y)) : ctx.lineTo(px(p.x),py(p.y)));
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 8; ctx.setLineDash([]); ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke();
     ctx.restore();
-
-    // Main dashed route
+    // Dashed line
     ctx.save();
     ctx.beginPath();
-    pts.forEach((p, i) => i === 0 ? ctx.moveTo(px(p.x), py(p.y)) : ctx.lineTo(px(p.x), py(p.y)));
-    ctx.strokeStyle = '#e74c3c';
-    ctx.lineWidth = 4;
-    ctx.setLineDash([12, 8]);
-    ctx.lineDashOffset = -dashOffset;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke();
+    pts.forEach((p,i) => i===0 ? ctx.moveTo(px(p.x),py(p.y)) : ctx.lineTo(px(p.x),py(p.y)));
+    ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 5; ctx.setLineDash([14,9]); ctx.lineDashOffset = -dashOffset; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke();
     ctx.restore();
-
-    dashOffset = (dashOffset + 0.4) % 20;
+    dashOffset = (dashOffset + 0.4) % 23;
     animFrame = requestAnimationFrame(animate);
   }
   animate();
 }
 
-// Place markers
 function placeMarker(xPct, yPct, color, label) {
-  const size = 32;
-  const svg = `<svg width="${size}" height="${size+8}" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="16" cy="14" r="12" fill="${color}" stroke="#fff" stroke-width="2.5"/>
-    <path d="M16 28 L11 20 Q4 14 16 3 Q28 14 21 20Z" fill="${color}"/>
-    <circle cx="16" cy="14" r="5" fill="#fff"/>
+  const svg = `<svg width="36" height="48" viewBox="0 0 36 48" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="18" cy="16" r="14" fill="${color}" stroke="#fff" stroke-width="3"/>
+    <path d="M18 34 L12 22 Q3 16 18 4 Q33 16 24 22Z" fill="${color}"/>
+    <circle cx="18" cy="16" r="6" fill="#fff"/>
   </svg>`;
   const el = document.createElement('div');
   el.className = 'mk-pin';
   el.innerHTML = svg;
   el.style.left = (xPct / 100 * MAP_W) + 'px';
-  el.style.top = (yPct / 100 * MAP_H) + 'px';
+  el.style.top  = (yPct / 100 * MAP_H) + 'px';
   el.title = label;
   return el;
 }
 
-function clearMarkers() {
-  mkDiv.innerHTML = '';
-}
+function clearMarkers() { mkDiv.innerHTML = ''; }
 
 // ======================================================
 // STATE
@@ -504,167 +436,125 @@ let selA = null, selB = null;
 
 function setStatus(msg, cls) {
   const el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = cls || '';
+  el.textContent = msg; el.className = cls || '';
 }
-
 function updateRouteBtn() {
   document.getElementById('btn-r').disabled = !(selA && selB);
 }
-
 function calcRoute() {
   if (!selA || !selB) return;
   const pts = buildRoutePts(selA.x, selA.y, selB.x, selB.y);
   clearMarkers();
-  if (!pts) {
-    setStatus('Não foi possível calcular a rota.', 'err');
-    return;
-  }
+  if (!pts) { setStatus('Não foi possível calcular a rota.','err'); return; }
   drawRoute(pts);
   mkDiv.appendChild(placeMarker(selA.x, selA.y, '#27ae60', selA.label));
   mkDiv.appendChild(placeMarker(selB.x, selB.y, '#e74c3c', selB.label));
   autoZoomToRoute(pts);
-  const dist = Math.round(pts.reduce((s, p, i) => {
+  const dist = Math.round(pts.reduce((s,p,i) => {
     if (!i) return 0;
-    const dx = (p.x - pts[i-1].x) / 100 * 280;
-    const dy = (p.y - pts[i-1].y) / 100 * 198;
-    return s + Math.sqrt(dx*dx + dy*dy);
-  }, 0));
-  setStatus(`Rota: ${selA.label} → ${selB.label} · ~${dist}m`, 'ok');
+    const dx=(p.x-pts[i-1].x)/100*280, dy=(p.y-pts[i-1].y)/100*198;
+    return s+Math.sqrt(dx*dx+dy*dy);
+  },0));
+  setStatus(`Rota: ${selA.label} → ${selB.label} · ~${dist}m`,'ok');
 }
 
 // ======================================================
 // SEARCH UI
 // ======================================================
-let activeField = null;
-
 function makeDropdown(items, inputEl, onSelect) {
   const dd = inputEl.parentElement.querySelector('.dropdown');
   dd.innerHTML = '';
-  if (!items.length) { dd.style.display = 'none'; return; }
-  items.forEach((item, i) => {
+  if (!items.length) { dd.style.display='none'; return; }
+  items.forEach((item,i) => {
     const d = document.createElement('div');
-    d.className = 'dd-item' + (i === 0 ? ' hi' : '');
-    const isStand = item.type === 'stand';
-    d.innerHTML = `<span class="dd-code">${isStand ? 'Stand ' + item.code : item.code}</span><span class="dd-name">${item.label}</span>`;
+    d.className = 'dd-item'+(i===0?' hi':'');
+    const isStand = item.type==='stand';
+    d.innerHTML = `<span class="dd-code">${isStand?'Stand '+item.code:item.code}</span><span class="dd-name">${item.label}</span>`;
     d.addEventListener('mousedown', e => { e.preventDefault(); onSelect(item); });
+    d.addEventListener('touchstart', e => { e.preventDefault(); onSelect(item); }, {passive:false});
     dd.appendChild(d);
   });
   dd.style.display = 'block';
 }
-
-function closeAllDd() {
-  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
-}
+function closeAllDd() { document.querySelectorAll('.dropdown').forEach(d => d.style.display='none'); }
 
 function setupField(inputId, which) {
   const inp = document.getElementById(inputId);
   inp.addEventListener('input', () => {
     const results = searchItems(inp.value);
     makeDropdown(results, inp, item => {
-      inp.value = item.type === 'stand' ? (item.company || item.code) : item.label;
-      if (which === 'a') { selA = item; }
-      else { selB = item; }
-      closeAllDd();
-      updateRouteBtn();
-      if (selA && selB) setTimeout(calcRoute, 100);
+      inp.value = item.type==='stand' ? (item.company||item.code) : item.label;
+      if (which==='a') selA=item; else selB=item;
+      closeAllDd(); updateRouteBtn();
+      if (selA && selB) setTimeout(calcRoute, 80);
     });
   });
-  inp.addEventListener('focus', () => {
-    if (inp.value) inp.dispatchEvent(new Event('input'));
-  });
+  inp.addEventListener('focus', () => { if (inp.value) inp.dispatchEvent(new Event('input')); });
   inp.addEventListener('keydown', e => {
     const dd = inp.parentElement.querySelector('.dropdown');
     const items = dd.querySelectorAll('.dd-item');
     let cur = [...items].findIndex(el => el.classList.contains('hi'));
-    if (e.key === 'ArrowDown') {
+    if (e.key==='ArrowDown') {
       e.preventDefault();
-      if (cur >= 0) items[cur].classList.remove('hi');
-      cur = (cur + 1) % items.length;
-      items[cur].classList.add('hi');
-      items[cur].scrollIntoView({block:'nearest'});
-    } else if (e.key === 'ArrowUp') {
+      if (cur>=0) items[cur].classList.remove('hi');
+      cur=(cur+1)%items.length; items[cur].classList.add('hi'); items[cur].scrollIntoView({block:'nearest'});
+    } else if (e.key==='ArrowUp') {
       e.preventDefault();
-      if (cur >= 0) items[cur].classList.remove('hi');
-      cur = (cur - 1 + items.length) % items.length;
-      items[cur].classList.add('hi');
-      items[cur].scrollIntoView({block:'nearest'});
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      if (cur >= 0) items[cur].dispatchEvent(new MouseEvent('mousedown'));
-    } else if (e.key === 'Escape') {
-      closeAllDd();
-    }
+      if (cur>=0) items[cur].classList.remove('hi');
+      cur=(cur-1+items.length)%items.length; items[cur].classList.add('hi'); items[cur].scrollIntoView({block:'nearest'});
+    } else if (e.key==='Enter') {
+      e.preventDefault(); if (cur>=0) items[cur].dispatchEvent(new MouseEvent('mousedown'));
+    } else if (e.key==='Escape') closeAllDd();
   });
-  inp.addEventListener('blur', () => { setTimeout(closeAllDd, 150); });
+  inp.addEventListener('blur', () => { setTimeout(closeAllDd, 180); });
 }
-
-setupField('inp-a', 'a');
-setupField('inp-b', 'b');
+setupField('inp-a','a');
+setupField('inp-b','b');
 
 // ======================================================
-// PAN / ZOOM INTERACTIONS
+// PAN / ZOOM
 // ======================================================
-let isPanning = false, lastPx = 0, lastPy = 0;
-let pinchDist = 0;
+let isPanning=false, lastPx=0, lastPy=0, pinchDist=0, lastTouches=[];
 
 vp.addEventListener('mousedown', e => {
-  if (e.target.closest('#panel, #zc, #legend')) return;
-  isPanning = true;
-  lastPx = e.clientX; lastPy = e.clientY;
-  vp.classList.add('grabbing');
-  closeAllDd();
+  if (e.target.closest('#panel,#zc,#legend')) return;
+  isPanning=true; lastPx=e.clientX; lastPy=e.clientY;
+  vp.classList.add('grabbing'); closeAllDd();
 });
-
 window.addEventListener('mousemove', e => {
   if (!isPanning) return;
-  panX += e.clientX - lastPx;
-  panY += e.clientY - lastPy;
-  lastPx = e.clientX; lastPy = e.clientY;
-  applyTransform();
+  panX+=e.clientX-lastPx; panY+=e.clientY-lastPy;
+  lastPx=e.clientX; lastPy=e.clientY; applyTransform();
 });
-
-window.addEventListener('mouseup', () => { isPanning = false; vp.classList.remove('grabbing'); });
-
+window.addEventListener('mouseup', () => { isPanning=false; vp.classList.remove('grabbing'); });
 vp.addEventListener('wheel', e => {
   e.preventDefault();
-  const factor = e.deltaY < 0 ? 1.12 : 1/1.12;
-  zoomBy(factor, e.clientX, e.clientY);
-}, {passive: false});
+  zoomBy(e.deltaY<0?1.12:1/1.12, e.clientX, e.clientY);
+},{passive:false});
 
-// Touch events
-let lastTouches = [];
-
-function getTouchDist(t1, t2) {
-  const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
-  return Math.sqrt(dx*dx + dy*dy);
-}
-
+function getTouchDist(t1,t2) { const dx=t1.clientX-t2.clientX,dy=t1.clientY-t2.clientY; return Math.sqrt(dx*dx+dy*dy); }
 vp.addEventListener('touchstart', e => {
-  e.preventDefault();
-  closeAllDd();
-  lastTouches = [...e.touches];
-  if (e.touches.length === 2) pinchDist = getTouchDist(e.touches[0], e.touches[1]);
-}, {passive: false});
-
+  if (e.target.closest('#panel,#zc,#legend')) return;
+  e.preventDefault(); closeAllDd();
+  lastTouches=[...e.touches];
+  if (e.touches.length===2) pinchDist=getTouchDist(e.touches[0],e.touches[1]);
+},{passive:false});
 vp.addEventListener('touchmove', e => {
   e.preventDefault();
-  if (e.touches.length === 1 && lastTouches.length === 1) {
-    panX += e.touches[0].clientX - lastTouches[0].clientX;
-    panY += e.touches[0].clientY - lastTouches[0].clientY;
+  if (e.touches.length===1 && lastTouches.length===1) {
+    panX+=e.touches[0].clientX-lastTouches[0].clientX;
+    panY+=e.touches[0].clientY-lastTouches[0].clientY;
     applyTransform();
-  } else if (e.touches.length === 2 && lastTouches.length === 2) {
-    const newDist = getTouchDist(e.touches[0], e.touches[1]);
-    const factor = newDist / pinchDist;
-    pinchDist = newDist;
-    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    zoomBy(factor, cx, cy);
+  } else if (e.touches.length===2 && lastTouches.length===2) {
+    const nd=getTouchDist(e.touches[0],e.touches[1]);
+    const factor=nd/pinchDist; pinchDist=nd;
+    const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    zoomBy(factor,cx,cy);
   }
-  lastTouches = [...e.touches];
-}, {passive: false});
-
-vp.addEventListener('touchend', e => { lastTouches = [...e.touches]; });
+  lastTouches=[...e.touches];
+},{passive:false});
+vp.addEventListener('touchend', e => { lastTouches=[...e.touches]; });
 </script>
 </body>
 </html>
