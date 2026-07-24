@@ -81,9 +81,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:-ap
 /* Markers */
 .mk-pin{
   position:absolute;transform:translate(-50%,-100%);
+  transform-origin:50% 100%;
   pointer-events:none;
   filter:drop-shadow(0 3px 6px rgba(0,0,0,.35));
 }
+#compass span{transition:transform .12s linear}
 .mk-pin svg{display:block}
 
 /* === ZOOM CONTROLS === */
@@ -168,6 +170,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:-ap
 </div>
 
 <div id="zc">
+  <button class="zb" id="compass" onclick="resetNorth()" title="Apontar para o Norte" style="display:none;font-size:15px">
+    <span id="compass-n" style="display:inline-block;font-weight:800;color:#e74c3c;line-height:1">N</span>
+  </button>
   <button class="zb" onclick="zoomBy(1.3)" title="Zoom +">+</button>
   <button class="zb" onclick="zoomBy(1/1.3)" title="Zoom −">−</button>
   <button class="zb" onclick="resetView()" title="Ver tudo" style="font-size:13px">⊡</button>
@@ -386,7 +391,7 @@ const ctx = cv.getContext('2d');
 const panel = document.getElementById('panel');
 
 let MAP_W = 0, MAP_H = 0;
-let zoom = 1, panX = 0, panY = 0;
+let zoom = 1, panX = 0, panY = 0, rot = 0;   // rot em radianos
 
 function getPanelH() { return panel.getBoundingClientRect().bottom || panel.offsetHeight; }
 
@@ -402,14 +407,40 @@ function onMapLoad() {
 
 function applyTransform(animated) {
   ms.style.transition = animated ? 'transform .45s cubic-bezier(.25,.8,.25,1)' : '';
-  ms.style.transform = `translate(${panX.toFixed(1)}px,${panY.toFixed(1)}px) scale(${zoom})`;
+  ms.style.transform =
+    `translate(${panX.toFixed(1)}px,${panY.toFixed(1)}px) rotate(${(rot*180/Math.PI).toFixed(2)}deg) scale(${zoom})`;
+  updateMarkerRot(animated);
+  updateCompass();
+}
+
+// mantém os pinos na vertical (contra-rotaciona pela âncora na ponta)
+function updateMarkerRot(animated) {
+  const deg = (-rot * 180 / Math.PI).toFixed(2);
+  for (const el of mkDiv.children) {
+    el.style.transition = animated ? 'transform .45s cubic-bezier(.25,.8,.25,1)' : '';
+    el.style.transform = `translate(-50%,-100%) rotate(${deg}deg)`;
+  }
+}
+
+// converte ponto da tela → coordenada local do mapa (desfaz pan/rot/zoom)
+function screenToLocal(cx, cy) {
+  const dx = cx - panX, dy = cy - panY;
+  const c = Math.cos(rot), s = Math.sin(rot);
+  return [(dx * c + dy * s) / zoom, (-dx * s + dy * c) / zoom];
+}
+// recalcula o pan p/ que o ponto local p fique sob a tela (cx,cy)
+function panToAnchor(p, cx, cy) {
+  const c = Math.cos(rot), s = Math.sin(rot);
+  const sx = zoom * p[0], sy = zoom * p[1];
+  panX = cx - (sx * c - sy * s);
+  panY = cy - (sx * s + sy * c);
 }
 
 function resetView() {
   const vw = vp.offsetWidth, vh = vp.offsetHeight;
   const ph = getPanelH();
   const fitZ = Math.min(vw / MAP_W, (vh - ph) / MAP_H) * 0.96;
-  zoom = fitZ;
+  zoom = fitZ; rot = 0;
   panX = (vw - MAP_W * zoom) / 2;
   panY = ph + ((vh - ph) - MAP_H * zoom) / 2;
   applyTransform(true);
@@ -419,11 +450,29 @@ function zoomBy(factor, cx, cy) {
   const vw = vp.offsetWidth, vh = vp.offsetHeight;
   if (cx === undefined) cx = vw / 2;
   if (cy === undefined) cy = vh / 2;
-  const prevZoom = zoom;
+  const p = screenToLocal(cx, cy);
   zoom = Math.max(0.1, Math.min(8, zoom * factor));
-  panX = cx - (cx - panX) * (zoom / prevZoom);
-  panY = cy - (cy - panY) * (zoom / prevZoom);
+  panToAnchor(p, cx, cy);
   applyTransform();
+}
+
+// bússola: aparece quando o mapa está girado; toque volta ao Norte
+function updateCompass() {
+  const c = document.getElementById('compass');
+  if (!c) return;
+  let deg = (rot * 180 / Math.PI) % 360;
+  if (Math.abs(deg) < 0.5) { c.style.display = 'none'; return; }
+  c.style.display = 'flex';
+  const n = document.getElementById('compass-n');
+  if (n) n.style.transform = `rotate(${deg.toFixed(1)}deg)`;
+}
+function resetNorth() {
+  const vw = vp.offsetWidth, vh = vp.offsetHeight;
+  const cx = vw / 2, cy = (getPanelH() + vh) / 2;
+  const p = screenToLocal(cx, cy);
+  rot = 0;
+  panToAnchor(p, cx, cy);
+  applyTransform(true);
 }
 
 function autoZoomToRoute(pts) {
@@ -438,6 +487,7 @@ function autoZoomToRoute(pts) {
   const vw = vp.offsetWidth;
   const ph = getPanelH();
   const availH = vp.offsetHeight - ph;
+  rot = 0;
   zoom = Math.min(vw / routeW, availH / routeH, 5);
   zoom = Math.max(zoom, 0.4);
   const cx = (minX + maxX) / 2;
@@ -660,6 +710,8 @@ setupField('inp-b','b');
 // PAN / ZOOM
 // ======================================================
 let isPanning=false, lastPx=0, lastPy=0, pinchDist=0, lastTouches=[];
+let pinchAngle=0, pinchMidX=0, pinchMidY=0;
+function getTouchAngle(t1,t2) { return Math.atan2(t2.clientY-t1.clientY, t2.clientX-t1.clientX); }
 
 vp.addEventListener('mousedown', e => {
   if (e.target.closest('#panel,#zc,#legend')) return;
@@ -694,6 +746,9 @@ vp.addEventListener('touchstart', e => {
   lastTouches=[...e.touches];
   if (e.touches.length===2) {
     pinchDist=getTouchDist(e.touches[0],e.touches[1]);
+    pinchAngle=getTouchAngle(e.touches[0],e.touches[1]);
+    pinchMidX=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    pinchMidY=(e.touches[0].clientY+e.touches[1].clientY)/2;
     lastTapT=0; // cancel any pending double-tap
   } else if (e.touches.length===1) {
     const now=Date.now(), tx=e.touches[0].clientX, ty=e.touches[0].clientY;
@@ -715,10 +770,18 @@ vp.addEventListener('touchmove', e => {
     panX+=dx; panY+=dy; applyTransform();
   } else if (e.touches.length===2 && lastTouches.length===2) {
     const nd=getTouchDist(e.touches[0],e.touches[1]);
-    const factor=nd/pinchDist; pinchDist=nd;
+    const na=getTouchAngle(e.touches[0],e.touches[1]);
     const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
     const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
-    zoomBy(factor,cx,cy);
+    // ponto local sob o centro ANTERIOR entre os dedos
+    const p=screenToLocal(pinchMidX,pinchMidY);
+    // aplica zoom + rotação juntos
+    zoom=Math.max(0.1,Math.min(8, zoom*(nd/pinchDist)));
+    rot+=(na-pinchAngle);
+    // reancora esse ponto sob o centro ATUAL (permite arrastar junto)
+    panToAnchor(p,cx,cy);
+    pinchDist=nd; pinchAngle=na; pinchMidX=cx; pinchMidY=cy;
+    applyTransform();
   }
   lastTouches=[...e.touches];
 },{passive:false});
